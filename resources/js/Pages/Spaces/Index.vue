@@ -32,14 +32,17 @@ const features = [
     {
         title: 'Confirmacion inmediata',
         description: 'Recibe respuesta mas rapida y entra al flujo correcto sin perder tiempo.',
+        image: '/images/ui/why-confirmacion.jpg',
     },
     {
         title: 'Pago seguro',
         description: 'Procesos mas claros para operar tus reservas con confianza.',
+        image: '/images/ui/why-pago-seguro.jpg',
     },
     {
         title: 'Mejores precios',
         description: 'Compara canchas y elige la opcion ideal segun formato y presupuesto.',
+        image: '/images/ui/why-mejores-precios.jpg',
     },
 ];
 
@@ -213,26 +216,55 @@ function typeBadgeClass(type) {
             </div>
         </div>
 
-        <div class="mt-10 rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-xl shadow-emerald-100/40 md:p-8">
-            <div class="flex items-end justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-950">Por que elegirnos</h2>
-                    <p class="mt-1 text-sm text-slate-500">Una experiencia mas clara, rapida y preparada para reservas reales.</p>
-                </div>
+    </section>
+
+    <section class="relative mt-2 overflow-hidden bg-[#0d1712] py-20">
+        <div
+            class="absolute inset-0 bg-cover bg-center"
+            style="background-image: url('/images/banners/FondoPorqueElegirnos.png');"
+        ></div>
+        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,28,17,0.82)_0%,rgba(8,33,20,0.62)_48%,rgba(5,22,14,0.9)_100%)]"></div>
+        <div class="absolute inset-x-0 top-10 mx-auto h-40 max-w-3xl rounded-full bg-emerald-400/10 blur-3xl"></div>
+
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-3xl text-center">
+                <p class="text-[11px] font-medium uppercase tracking-[0.35em] text-emerald-300">ReservaCancha</p>
+                <h2 class="mt-4 text-3xl font-black uppercase tracking-tight text-white md:text-4xl">
+                    Por que elegirnos
+                </h2>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-emerald-50/85 md:text-base">
+                    Una experiencia mas clara, rapida y preparada para reservas reales, con herramientas pensadas para
+                    que consultar, reservar y organizar partidos se sienta simple desde el primer click.
+                </p>
             </div>
-            <div class="mt-8 grid gap-4 lg:grid-cols-3">
+
+            <div class="mt-12 grid gap-6 lg:grid-cols-3">
                 <article
                     v-for="feature in features"
                     :key="feature.title"
-                    class="rounded-[1.5rem] border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm"
+                    class="group flex min-h-[390px] flex-col rounded-[1.85rem] border border-white/15 bg-white/10 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.18)] backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/14"
                 >
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/15 text-green-600">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
+                    <div class="h-48 overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/92 shadow-inner shadow-emerald-100/40">
+                        <img
+                            :src="feature.image"
+                            :alt="feature.title"
+                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                        >
                     </div>
-                    <h3 class="mt-4 text-sm font-semibold text-slate-950">{{ feature.title }}</h3>
-                    <p class="mt-2 text-sm leading-6 text-slate-500">{{ feature.description }}</p>
+                    <div class="mt-8 flex flex-1 flex-col">
+                        <div class="inline-flex w-fit rounded-full border border-emerald-300/25 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-200">
+                            Beneficio clave
+                        </div>
+                        <h3 class="mt-5 min-h-[56px] text-xl font-semibold leading-7 text-white">
+                            {{ feature.title }}
+                        </h3>
+                        <p class="min-h-[84px] pt-3 text-sm leading-7 text-emerald-50/80">
+                            {{ feature.description }}
+                        </p>
+                        <div class="mt-auto border-t border-white/10 pt-5 text-sm font-medium text-emerald-300">
+                            Diseñado para ayudarte a reservar mejor
+                        </div>
+                    </div>
                 </article>
             </div>
         </div>
