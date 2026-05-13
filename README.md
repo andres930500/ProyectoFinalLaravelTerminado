@@ -1,9 +1,11 @@
 # 🏟️ ReservaCancha — Sistema de Reservas de Canchas de Fútbol
 
 ## Descripción
+
 Plataforma web para gestión y reserva de canchas de fútbol desarrollada con Laravel 12, Jetstream (Inertia + Vue 3) y TailwindCSS. Permite consultar disponibilidad en tiempo real, realizar reservas sin necesidad de cuenta, y administrar todos los aspectos del negocio desde un panel protegido.
 
 ## Tecnologías
+
 - PHP 8.2+, Laravel 12.x
 - Laravel Jetstream con Inertia.js + Vue 3
 - TailwindCSS 3.x
@@ -12,6 +14,7 @@ Plataforma web para gestión y reserva de canchas de fútbol desarrollada con La
 - Vite para compilación de assets
 
 ## Requisitos previos
+
 - PHP 8.2 o superior con extensiones: BCMath, Ctype, cURL, DOM, Fileinfo, JSON, Mbstring, OpenSSL, PCRE, PDO, Tokenizer, XML
 - Composer 2.x
 - Node.js 18+ y npm
@@ -100,25 +103,29 @@ php artisan serve
 ```
 
 11. Acceder a:
+
 - Sitio público: `http://localhost:8000`
 - Panel admin: `http://localhost:8000/login`
 - Credenciales admin por defecto:
-  - Email: `admin@reservacancha.com`
-  - Password: `Admin123!`
+    - Email: `admin@reservacancha.com`
+    - Password: `Admin123!`
 
 ## Comandos útiles de desarrollo
-- `php artisan migrate:fresh --seed`  reiniciar DB con datos de prueba
-- `php artisan route:list`  ver todas las rutas
-- `php artisan tinker`  consola interactiva
-- `npm run dev`  hot reload para desarrollo
+
+- `php artisan migrate:fresh --seed` reiniciar DB con datos de prueba
+- `php artisan route:list` ver todas las rutas
+- `php artisan tinker` consola interactiva
+- `npm run dev` hot reload para desarrollo
 
 ## Variables de entorno importantes
-- `RESERVATION_SLOT_MINUTES=60`  duración mínima de cada reserva en minutos
-- `APP_URL=http://localhost:8000`  URL base de la aplicación
-- `MAIL_MAILER=smtp`  mailer usado para notificaciones
-- `FILESYSTEM_DISK=public`  recomendado para manejo de imágenes de canchas
+
+- `RESERVATION_SLOT_MINUTES=60` duración mínima de cada reserva en minutos
+- `APP_URL=http://localhost:8000` URL base de la aplicación
+- `MAIL_MAILER=smtp` mailer usado para notificaciones
+- `FILESYSTEM_DISK=public` recomendado para manejo de imágenes de canchas
 
 ## Estructura del proyecto
+
 - `app/Models`:
   modelos principales del dominio como `Space`, `Reservation`, `Availability` y `BlockedSlot`.
 - `app/Http/Controllers`:
@@ -141,6 +148,7 @@ php artisan serve
 ## Funcionalidades principales
 
 ### Módulo público
+
 - Listado de canchas activas con filtros por tipo.
 - Vista de detalle de cada cancha con reglas, descripción y disponibilidad semanal.
 - Consulta de próximos horarios disponibles.
@@ -149,6 +157,7 @@ php artisan serve
 - Envío de correo al crear la reserva.
 
 ### Panel administrativo
+
 - Dashboard con métricas operativas.
 - Gestión completa de canchas.
 - Gestión de disponibilidad semanal por cancha.
@@ -159,6 +168,7 @@ php artisan serve
 - Correos automáticos al confirmar, rechazar o cancelar una reserva.
 
 ## Usuario administrador por defecto
+
 Al ejecutar `php artisan migrate --seed`, el sistema crea automáticamente un usuario administrador:
 
 - Email: `admin@reservacancha.com`
@@ -166,15 +176,18 @@ Al ejecutar `php artisan migrate --seed`, el sistema crea automáticamente un us
 - Nombre: `Administrador`
 
 ## Correos y Mailtrap
+
 Para desarrollo se recomienda usar Mailtrap con las variables SMTP configuradas en `.env`.
 
 Mailables implementados:
+
 - `ReservationCreatedMail`
 - `ReservationConfirmedMail`
 - `ReservationRejectedMail`
 - `ReservationCancelledMail`
 
 ## Publicar vistas Markdown de Laravel Mail
+
 Para publicar las vistas base de correos Markdown:
 
 ```bash
@@ -186,6 +199,7 @@ Luego puedes cambiar el color del botón a verde en:
 `resources/views/vendor/mail/html/themes/default.css`
 
 Busca estas clases y ajusta el color:
+
 - `.button-primary`
 - `.button-success`
 
@@ -203,6 +217,7 @@ Ejemplo:
 ```
 
 ## Notas de desarrollo
+
 - Para usar imágenes de canchas subidas desde el panel, se recomienda mantener `FILESYSTEM_DISK=public`.
 - Si usas SQLite para desarrollo rápido, deja `DB_CONNECTION=sqlite` y crea el archivo `database/database.sqlite`.
 - Si cambias variables de entorno sensibles, ejecuta:
@@ -212,8 +227,9 @@ php artisan config:clear
 ```
 
 ## Créditos
+
 Proyecto final de Framework Laravel — Cristian Camilo Echeverri Giraldo  
-Canchas de fútbol — [tu nombre]
+Canchas de fútbol — Andres Gonzalez lopez
 
 ---
 
