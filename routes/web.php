@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAvailabilityController;
 use App\Http\Controllers\AdminBlockedSlotController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AdminReservationController;
 use App\Http\Controllers\AdminSpaceController;
 use App\Http\Controllers\CalendarController;
@@ -20,6 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('dashboard');
     Route::redirect('/dashboard', '/home')->name('dashboard.redirect');
     Route::get('/calendar', [CalendarController::class, 'index'])->name('admin.calendar');
+    Route::get('/admin/reports', [ReportController::class, 'index'])->name('admin.reports');
+    Route::get('/admin/reports/export', [ReportController::class, 'export'])->name('admin.reports.export');
     Route::resource('admin/spaces', AdminSpaceController::class)->names('admin.spaces');
     Route::resource('admin/reservations', AdminReservationController::class)->only(['index', 'show'])->names('admin.reservations');
     Route::post('admin/reservations/{reservation:slug}/accept', [AdminReservationController::class, 'accept'])->name('admin.reservations.accept');

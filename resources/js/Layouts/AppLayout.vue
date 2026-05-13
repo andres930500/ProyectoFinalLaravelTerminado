@@ -71,6 +71,17 @@ function navClasses(active) {
                                 <ResponsiveNavLink :href="route('admin.reservations.index')" :active="route().current('admin.reservations.*')" :class="navClasses(route().current('admin.reservations.*'))">
                                     Reservas
                                 </ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('admin.reports')" :active="route().current('admin.reports*')" :class="navClasses(route().current('admin.reports*'))">
+                                    <span class="inline-flex items-center gap-2">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19V5" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 19v-7" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M22 19V3" />
+                                        </svg>
+                                        Reportes
+                                    </span>
+                                </ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('admin.blocked-slots.index')" :active="route().current('admin.blocked-slots.*')" :class="navClasses(route().current('admin.blocked-slots.*'))">
                                     Bloqueos
                                 </ResponsiveNavLink>
@@ -211,6 +222,9 @@ function navClasses(active) {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('admin.reservations.index')" :active="route().current('admin.reservations.*')">
                             Reservas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('admin.reports')" :active="route().current('admin.reports*')">
+                            Reportes
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('admin.blocked-slots.index')" :active="route().current('admin.blocked-slots.*')">
                             Bloqueos

@@ -1,12 +1,44 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Filler,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    Tooltip,
+} from 'chart.js';
+import { computed } from 'vue';
+import { Bar, Doughnut, Line } from 'vue-chartjs';
 
-defineProps({
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    ArcElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler,
+);
+
+const props = defineProps({
     pendingToday: Number,
     confirmedThisWeek: Number,
     upcomingReservations: Array,
     spaces: Array,
+    reservationsByDay: Array,
+    reservationsByStatus: Array,
+    spaceOccupancy: Array,
+    weeklyIncome: Array,
 });
 
 const statusClasses = {
@@ -24,12 +56,223 @@ const typeLabels = {
     cancha_futbol_playa: 'Futbol Playa',
 };
 
+const statusChartColors = {
+    pending: '#F59E0B',
+    confirmed: '#10B981',
+    rejected: '#EF4444',
+    cancelled: '#EF4444',
+    finished: '#9CA3AF',
+};
+
+const axisTickColor = '#9CA3AF';
+const gridColor = 'rgba(255,255,255,0.05)';
+
 function formatDateTime(value) {
     return new Intl.DateTimeFormat('es-CO', {
         dateStyle: 'medium',
         timeStyle: 'short',
     }).format(new Date(value));
 }
+
+function formatShortDate(value) {
+    return new Intl.DateTimeFormat('es-CO', {
+        month: 'short',
+        day: 'numeric',
+    }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatCurrency(value) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0,
+    }).format(Number(value ?? 0));
+}
+
+function buildLastSevenDays(items, valueKey = 'total') {
+    const index = Object.fromEntries((items || []).map((item) => [item.fecha, Number(item[valueKey] ?? 0)]));
+
+    return Array.from({ length: 7 }, (_, offset) => {
+        const date = new Date();
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() - (6 - offset));
+        const key = date.toISOString().slice(0, 10);
+
+        return {
+            label: formatShortDate(key),
+            value: index[key] ?? 0,
+        };
+    });
+}
+
+const baseCartesianOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            labels: {
+                color: axisTickColor,
+            },
+        },
+        tooltip: {
+            backgroundColor: '#0b1510',
+            borderColor: '#1e3a24',
+            borderWidth: 1,
+            titleColor: '#ffffff',
+            bodyColor: '#d1d5db',
+        },
+    },
+    scales: {
+        x: {
+            grid: {
+                color: gridColor,
+            },
+            ticks: {
+                color: axisTickColor,
+            },
+        },
+        y: {
+            grid: {
+                color: gridColor,
+            },
+            ticks: {
+                color: axisTickColor,
+            },
+            beginAtZero: true,
+        },
+    },
+};
+
+const reservationsLineData = computed(() => {
+    const values = buildLastSevenDays(props.reservationsByDay);
+
+    return {
+        labels: values.map((item) => item.label),
+        datasets: [
+            {
+                label: 'Reservas',
+                data: values.map((item) => item.value),
+                borderColor: '#00C853',
+                backgroundColor: 'rgba(0, 200, 83, 0.18)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 5,
+                pointBackgroundColor: '#00C853',
+            },
+        ],
+    };
+});
+
+const reservationsLineOptions = computed(() => ({
+    ...baseCartesianOptions,
+    plugins: {
+        ...baseCartesianOptions.plugins,
+        legend: {
+            display: false,
+        },
+    },
+}));
+
+const statusDonutData = computed(() => ({
+    labels: props.reservationsByStatus.map((item) => item.status),
+    datasets: [
+        {
+            data: props.reservationsByStatus.map((item) => Number(item.total ?? 0)),
+            backgroundColor: props.reservationsByStatus.map((item) => statusChartColors[item.status] ?? '#9CA3AF'),
+            borderWidth: 0,
+        },
+    ],
+}));
+
+const statusDonutOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                color: axisTickColor,
+                padding: 18,
+            },
+        },
+        tooltip: {
+            backgroundColor: '#0b1510',
+            borderColor: '#1e3a24',
+            borderWidth: 1,
+            titleColor: '#ffffff',
+            bodyColor: '#d1d5db',
+        },
+    },
+}));
+
+const occupancyBarData = computed(() => ({
+    labels: props.spaceOccupancy.map((space) => space.name),
+    datasets: [
+        {
+            label: 'Confirmadas',
+            data: props.spaceOccupancy.map((space) => Number(space.confirmadas ?? 0)),
+            backgroundColor: ['#00C853', '#10B981', '#34D399', '#6EE7B7'],
+            borderRadius: 8,
+            borderSkipped: false,
+        },
+    ],
+}));
+
+const occupancyBarOptions = computed(() => ({
+    ...baseCartesianOptions,
+    indexAxis: 'y',
+    plugins: {
+        ...baseCartesianOptions.plugins,
+        legend: {
+            display: false,
+        },
+    },
+}));
+
+const weeklyIncomeData = computed(() => {
+    const values = buildLastSevenDays(props.weeklyIncome);
+
+    return {
+        labels: values.map((item) => item.label),
+        datasets: [
+            {
+                label: 'Ingresos',
+                data: values.map((item) => item.value),
+                backgroundColor: '#00C853',
+                borderRadius: 8,
+                borderSkipped: false,
+            },
+        ],
+    };
+});
+
+const weeklyIncomeOptions = computed(() => ({
+    ...baseCartesianOptions,
+    plugins: {
+        ...baseCartesianOptions.plugins,
+        legend: {
+            display: false,
+        },
+        tooltip: {
+            ...baseCartesianOptions.plugins.tooltip,
+            callbacks: {
+                label: (context) => ` ${formatCurrency(context.raw)}`,
+            },
+        },
+    },
+    scales: {
+        ...baseCartesianOptions.scales,
+        y: {
+            ...baseCartesianOptions.scales.y,
+            ticks: {
+                color: axisTickColor,
+                callback: (value) => formatCurrency(value),
+            },
+        },
+    },
+}));
 </script>
 
 <template>
@@ -62,6 +305,48 @@ function formatDateTime(value) {
                         <p class="mt-4 text-4xl font-semibold text-slate-950">{{ spaces.length }}</p>
                         <p class="mt-2 text-sm text-slate-500">Espacios visibles hoy en el modulo publico.</p>
                     </div>
+                </section>
+
+                <section class="grid gap-6 lg:grid-cols-2">
+                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-white">Reservas ultimos 7 dias</h3>
+                            <p class="mt-1 text-sm text-slate-400">Actividad reciente de creacion de reservas.</p>
+                        </div>
+                        <div class="h-80">
+                            <Line :data="reservationsLineData" :options="reservationsLineOptions" />
+                        </div>
+                    </article>
+
+                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-white">Reservas por estado</h3>
+                            <p class="mt-1 text-sm text-slate-400">Distribucion actual del flujo de solicitudes.</p>
+                        </div>
+                        <div class="h-80">
+                            <Doughnut :data="statusDonutData" :options="statusDonutOptions" />
+                        </div>
+                    </article>
+
+                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-white">Reservas por cancha</h3>
+                            <p class="mt-1 text-sm text-slate-400">Confirmadas este mes por espacio activo.</p>
+                        </div>
+                        <div class="h-80">
+                            <Bar :data="occupancyBarData" :options="occupancyBarOptions" />
+                        </div>
+                    </article>
+
+                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-white">Ingresos por semana</h3>
+                            <p class="mt-1 text-sm text-slate-400">Valor estimado de reservas confirmadas recientes.</p>
+                        </div>
+                        <div class="h-80">
+                            <Bar :data="weeklyIncomeData" :options="weeklyIncomeOptions" />
+                        </div>
+                    </article>
                 </section>
 
                 <section class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">

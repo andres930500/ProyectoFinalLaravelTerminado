@@ -1,55 +1,71 @@
-# 🏟️ ReservaCancha — Sistema de Reservas de Canchas de Fútbol
+# ReservaCancha - Sistema de Reservas de Canchas de Futbol
 
-## Descripción
+## Descripcion
 
-Plataforma web para gestión y reserva de canchas de fútbol desarrollada con Laravel 12, Jetstream (Inertia + Vue 3) y TailwindCSS. Permite consultar disponibilidad en tiempo real, realizar reservas sin necesidad de cuenta, y administrar todos los aspectos del negocio desde un panel protegido.
+ReservaCancha es una plataforma web para gestionar y reservar canchas de futbol.  
+Fue construida con Laravel, Jetstream, Inertia, Vue 3 y TailwindCSS.
 
-## Tecnologías
+Permite:
 
-- PHP 8.2+, Laravel 12.x
-- Laravel Jetstream con Inertia.js + Vue 3
-- TailwindCSS 3.x
-- MySQL / SQLite
-- Mailtrap (desarrollo) para notificaciones por email
-- Vite para compilación de assets
+- consultar disponibilidad en tiempo real
+- reservar sin necesidad de crear cuenta
+- administrar espacios, bloqueos y solicitudes desde un panel privado
+- visualizar reportes operativos y metricas de negocio
+
+## Tecnologias
+
+- PHP 8.2+
+- Laravel 12+ / compatible con el proyecto actual
+- Laravel Jetstream
+- Inertia.js + Vue 3
+- TailwindCSS
+- MySQL o SQLite
+- Chart.js + vue-chartjs
+- Mailtrap para desarrollo de correos
+- Vite
 
 ## Requisitos previos
 
-- PHP 8.2 o superior con extensiones: BCMath, Ctype, cURL, DOM, Fileinfo, JSON, Mbstring, OpenSSL, PCRE, PDO, Tokenizer, XML
+- PHP 8.2 o superior
 - Composer 2.x
 - Node.js 18+ y npm
-- MySQL 8.0+ o SQLite
+- MySQL 8+ o SQLite
+- XAMPP o un servidor equivalente si vas a usar phpMyAdmin
 
-## Instalación paso a paso
+## Instalacion paso a paso
 
-1. Clonar el repositorio:
+1. Clonar el repositorio
 
 ```bash
 git clone [url] && cd sistema-de-reservas
 ```
 
-2. Instalar dependencias PHP:
+2. Instalar dependencias PHP
 
 ```bash
 composer install
 ```
 
-3. Instalar dependencias Node.js:
+3. Instalar dependencias frontend
 
 ```bash
 npm install
 ```
 
-4. Configurar el archivo de entorno:
+4. Configurar entorno
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-5. Configurar `.env` (sección base de datos y correo):
+5. Configurar `.env`
+
+### Opcion MySQL
 
 ```env
+APP_URL=http://127.0.0.1:8001
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -60,177 +76,173 @@ DB_PASSWORD=
 MAIL_MAILER=smtp
 MAIL_HOST=sandbox.smtp.mailtrap.io
 MAIL_PORT=2525
-MAIL_USERNAME=[tu_usuario_mailtrap]
-MAIL_PASSWORD=[tu_password_mailtrap]
+MAIL_USERNAME=tu_usuario_mailtrap
+MAIL_PASSWORD=tu_password_mailtrap
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="reservas@reservacancha.com"
+MAIL_FROM_NAME="ReservaCancha"
 
 RESERVATION_SLOT_MINUTES=60
+VITE_WHATSAPP_URL="https://wa.me/573113886216?text=Hola,%20tengo%20una%20duda%20sobre%20una%20reserva"
 ```
 
-6. Crear la base de datos en MySQL:
+### Opcion SQLite
+
+```env
+DB_CONNECTION=sqlite
+```
+
+6. Crear la base de datos si usas MySQL
 
 ```sql
 CREATE DATABASE reservacancha CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-7. Ejecutar migraciones y seeders:
+7. Ejecutar migraciones y seeders
 
 ```bash
 php artisan migrate --seed
 ```
 
-8. (Opcional) Crear enlace de almacenamiento:
+8. Crear enlace de almacenamiento
 
 ```bash
 php artisan storage:link
 ```
 
-9. Compilar assets:
+9. Compilar assets
 
 ```bash
 npm run build
 ```
 
-o para desarrollo:
+o en desarrollo:
 
 ```bash
 npm run dev
 ```
 
-10. Iniciar el servidor:
+10. Iniciar Laravel
 
 ```bash
-php artisan serve
+php artisan serve --host=127.0.0.1 --port=8001
 ```
 
-11. Acceder a:
+## Acceso al sistema
 
-- Sitio público: `http://localhost:8000`
-- Panel admin: `http://localhost:8000/login`
-- Credenciales admin por defecto:
-    - Email: `admin@reservacancha.com`
-    - Password: `Admin123!`
+- Sitio publico: `http://127.0.0.1:8001/`
+- Login admin: `http://127.0.0.1:8001/login`
 
-## Comandos útiles de desarrollo
-
-- `php artisan migrate:fresh --seed` reiniciar DB con datos de prueba
-- `php artisan route:list` ver todas las rutas
-- `php artisan tinker` consola interactiva
-- `npm run dev` hot reload para desarrollo
-
-## Variables de entorno importantes
-
-- `RESERVATION_SLOT_MINUTES=60` duración mínima de cada reserva en minutos
-- `APP_URL=http://localhost:8000` URL base de la aplicación
-- `MAIL_MAILER=smtp` mailer usado para notificaciones
-- `FILESYSTEM_DISK=public` recomendado para manejo de imágenes de canchas
-
-## Estructura del proyecto
-
-- `app/Models`:
-  modelos principales del dominio como `Space`, `Reservation`, `Availability` y `BlockedSlot`.
-- `app/Http/Controllers`:
-  controladores del módulo público y panel administrativo.
-- `app/Http/Requests`:
-  validaciones dedicadas, por ejemplo `ReservationRequest`.
-- `app/Mail`:
-  mailables para reservas creadas, confirmadas, rechazadas y canceladas.
-- `resources/js/Pages`:
-  páginas Vue para el sitio público y el panel admin.
-- `resources/js/Layouts`:
-  layouts Inertia, incluyendo `PublicLayout` y `AppLayout`.
-- `database/migrations`:
-  estructura de base de datos.
-- `database/seeders`:
-  seeders de canchas, reservas y usuario administrador.
-- `resources/views/emails`:
-  vistas Markdown para correos del sistema.
-
-## Funcionalidades principales
-
-### Módulo público
-
-- Listado de canchas activas con filtros por tipo.
-- Vista de detalle de cada cancha con reglas, descripción y disponibilidad semanal.
-- Consulta de próximos horarios disponibles.
-- Creación de reservas sin necesidad de cuenta.
-- Confirmación visual de reserva enviada.
-- Envío de correo al crear la reserva.
-
-### Panel administrativo
-
-- Dashboard con métricas operativas.
-- Gestión completa de canchas.
-- Gestión de disponibilidad semanal por cancha.
-- Gestión de bloqueos manuales de horarios.
-- Listado y detalle de reservas.
-- Aprobación, rechazo y cancelación de reservas.
-- Calendario semanal por cancha con estados visuales de slots.
-- Correos automáticos al confirmar, rechazar o cancelar una reserva.
-
-## Usuario administrador por defecto
-
-Al ejecutar `php artisan migrate --seed`, el sistema crea automáticamente un usuario administrador:
+Usuario admin por defecto:
 
 - Email: `admin@reservacancha.com`
 - Password: `Admin123!`
-- Nombre: `Administrador`
 
-## Correos y Mailtrap
+## Funcionalidades principales
 
-Para desarrollo se recomienda usar Mailtrap con las variables SMTP configuradas en `.env`.
+### Modulo publico
 
-Mailables implementados:
+- listado de canchas activas con filtros por tipo
+- detalle completo de cada cancha
+- consulta de disponibilidad por fecha y hora
+- proximos horarios disponibles
+- reserva publica sin autenticacion
+- confirmacion visual al crear reserva
+- boton flotante de WhatsApp para dudas
+- diseno responsive y estilizado
+
+### Panel administrativo
+
+- dashboard con metricas clave
+- graficas reales con Chart.js:
+  - reservas ultimos 7 dias
+  - reservas por estado
+  - reservas por cancha
+  - ingresos por semana
+- CRUD completo de canchas
+- gestion de disponibilidad semanal
+- gestion de bloqueos manuales
+- listado, detalle y cambio de estado de reservas
+- calendario semanal por cancha
+- pagina de reportes con filtros por rango
+- exportacion CSV de reservas
+
+## Reportes implementados
+
+La pagina `admin/reports` incluye:
+
+- total de reservaciones
+- reservas confirmadas, pendientes y rechazadas
+- ingresos totales
+- tasa de conversion
+- promedio por dia
+- ranking de canchas por reservas confirmadas e ingresos
+- grafica de horas mas activas
+- top 10 de clientes frecuentes
+- exportacion CSV del rango filtrado
+
+## Manejo de imagenes de canchas
+
+Cada cancha puede tener hasta 3 imagenes desde el panel admin.
+
+Caracteristicas:
+
+- carga multiple desde crear o editar cancha
+- almacenamiento en disco `public`
+- la primera imagen se usa como principal
+- en la vista publica del detalle se muestran la principal y miniaturas
+
+## Correos y notificaciones
+
+Correos implementados:
 
 - `ReservationCreatedMail`
 - `ReservationConfirmedMail`
 - `ReservationRejectedMail`
 - `ReservationCancelledMail`
 
-## Publicar vistas Markdown de Laravel Mail
-
-Para publicar las vistas base de correos Markdown:
+Para publicar vistas Markdown base:
 
 ```bash
 php artisan vendor:publish --tag=laravel-mail
 ```
 
-Luego puedes cambiar el color del botón a verde en:
+## Comandos utiles
 
-`resources/views/vendor/mail/html/themes/default.css`
-
-Busca estas clases y ajusta el color:
-
-- `.button-primary`
-- `.button-success`
-
-Ejemplo:
-
-```css
-.button-primary,
-.button-success {
-    background-color: #059669;
-    border-bottom: 8px solid #059669;
-    border-left: 18px solid #059669;
-    border-right: 18px solid #059669;
-    border-top: 8px solid #059669;
-}
+```bash
+php artisan migrate:fresh --seed
+php artisan route:list
+php artisan config:clear
+php artisan about
+npm run dev
+npm run build
 ```
+
+## Estructura del proyecto
+
+- `app/Models`: modelos del dominio
+- `app/Http/Controllers`: controladores publicos y administrativos
+- `app/Http/Controllers/Admin`: controladores dedicados del panel, incluyendo reportes
+- `app/Http/Requests`: validaciones de formularios
+- `app/Mail`: mailables del flujo de reservas
+- `database/migrations`: estructura de base de datos
+- `database/seeders`: seeders de canchas, reservas y admin
+- `resources/js/Pages`: paginas Vue del sitio y del panel
+- `resources/js/Layouts`: layouts Inertia
+- `resources/views/emails`: vistas de correo
 
 ## Notas de desarrollo
 
-- Para usar imágenes de canchas subidas desde el panel, se recomienda mantener `FILESYSTEM_DISK=public`.
-- Si usas SQLite para desarrollo rápido, deja `DB_CONNECTION=sqlite` y crea el archivo `database/database.sqlite`.
-- Si cambias variables de entorno sensibles, ejecuta:
+- Si cambias variables de entorno, ejecuta:
 
 ```bash
 php artisan config:clear
 ```
 
-## Créditos
+- Si ves pantalla en blanco y existe `public/hot`, elimina ese archivo cuando no estes corriendo Vite dev.
+- Para desarrollo rapido con phpMyAdmin, asegurate de que `DB_CONNECTION=mysql` y `DB_DATABASE=reservacancha` esten activos.
 
-Proyecto final de Framework Laravel — Cristian Camilo Echeverri Giraldo  
-Canchas de fútbol — Andres Gonzalez lopez
+## Creditos
 
----
-
-ReservaCancha — Sistema de Reservas de Canchas de Fútbol
+Proyecto final de Framework Laravel - Cristian Camilo Echeverri Giraldo  
+Canchas de futbol - Andres Gonzalez Lopez

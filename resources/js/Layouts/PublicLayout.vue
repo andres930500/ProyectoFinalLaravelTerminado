@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
                         :href="user ? route('dashboard') : route('login')"
                         class="ml-2 inline-flex items-center rounded-lg bg-[#00C853] px-4 py-1.5 text-sm font-medium text-black transition hover:bg-[#00b84c]"
                     >
-                        {{ user ? 'Panel' : 'Registrarse' }}
+                        {{ user ? 'Panel' : 'Login' }}
                     </Link>
                 </nav>
 
@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
                         class="mt-2 inline-flex items-center justify-center rounded-lg bg-[#00C853] px-4 py-3 text-sm font-medium text-black"
                         @click="closeMenu"
                     >
-                        {{ user ? 'Panel' : 'Registrarse' }}
+                        {{ user ? 'Panel' : 'Login' }}
                     </Link>
                 </nav>
             </div>
