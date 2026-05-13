@@ -21,7 +21,6 @@ function toggleSpace(space) {
         price_per_hour: space.price_per_hour,
         description: space.description,
         rules: space.rules,
-        image: space.image,
         is_active: !space.is_active,
         availabilities: (space.availabilities || []).map((availability) => ({
             day_of_week: availability.day_of_week,

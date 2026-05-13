@@ -34,16 +34,23 @@ const form = useForm({
     price_per_hour: props.space?.price_per_hour ?? '',
     description: props.space?.description ?? '',
     rules: props.space?.rules ?? '',
-    image: null,
+    images: [],
     is_active: props.space?.is_active ?? true,
     availabilities: buildAvailabilities(),
 });
 
-const previewImage = computed(() => {
-    if (form.image instanceof File) return URL.createObjectURL(form.image);
-    if (props.space?.image) return props.space.image.startsWith('http') ? props.space.image : `/storage/${props.space.image}`;
-    return null;
+const previewImages = computed(() => {
+    if (Array.isArray(form.images) && form.images.length) {
+        return form.images.map((file) => URL.createObjectURL(file));
+    }
+
+    return props.space?.images ?? [];
 });
+
+function handleImagesChange(event) {
+    const files = Array.from(event.target.files ?? []).slice(0, 3);
+    form.images = files;
+}
 
 function submit() {
     const options = { forceFormData: true, preserveScroll: true };
@@ -93,14 +100,18 @@ function submit() {
                 </div>
 
                 <div>
-                    <InputLabel for="image" value="Imagen" />
-                    <input id="image" type="file" accept="image/*" class="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700" @input="form.image = $event.target.files[0]" />
-                    <InputError class="mt-2" :message="form.errors.image" />
+                    <InputLabel for="images" value="Imagenes de la cancha" />
+                    <input id="images" type="file" accept="image/*" multiple class="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700" @change="handleImagesChange" />
+                    <p class="mt-2 text-xs text-slate-500">Puedes subir maximo 3 imagenes. Si cargas nuevas imagenes al editar, reemplazaran las actuales.</p>
+                    <InputError class="mt-2" :message="form.errors.images" />
+                    <InputError class="mt-2" :message="form.errors['images.0'] || form.errors['images.1'] || form.errors['images.2']" />
                 </div>
 
                 <div class="md:col-span-2">
-                    <div v-if="previewImage" class="mb-4 overflow-hidden rounded-[1.5rem] border border-slate-200">
-                        <img :src="previewImage" alt="Vista previa" class="h-48 w-full object-cover">
+                    <div v-if="previewImages.length" class="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div v-for="(previewImage, index) in previewImages" :key="`${previewImage}-${index}`" class="overflow-hidden rounded-[1.5rem] border border-slate-200">
+                            <img :src="previewImage" alt="Vista previa" class="h-40 w-full object-cover">
+                        </div>
                     </div>
                     <label class="inline-flex items-center gap-3 text-sm text-slate-700">
                         <input v-model="form.is_active" type="checkbox" class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">

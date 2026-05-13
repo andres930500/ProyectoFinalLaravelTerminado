@@ -88,8 +88,19 @@ function checkAvailability() {
                         </div>
                     </div>
 
-                    <div v-if="space.image" class="h-36 w-full overflow-hidden rounded-[1.5rem] bg-slate-100 sm:w-48">
-                        <img :src="space.image" :alt="space.name" class="h-full w-full object-cover">
+                    <div v-if="space.images?.length" class="grid w-full gap-3 sm:w-56">
+                        <div class="h-36 overflow-hidden rounded-[1.5rem] bg-slate-100">
+                            <img :src="space.images[0]" :alt="space.name" class="h-full w-full object-cover">
+                        </div>
+                        <div v-if="space.images.length > 1" class="grid grid-cols-2 gap-3">
+                            <div
+                                v-for="(image, index) in space.images.slice(1, 3)"
+                                :key="`${image}-${index}`"
+                                class="h-20 overflow-hidden rounded-[1rem] bg-slate-100"
+                            >
+                                <img :src="image" :alt="`${space.name} ${index + 2}`" class="h-full w-full object-cover">
+                            </div>
+                        </div>
                     </div>
                     <div v-else class="flex h-36 w-full items-center justify-center rounded-[1.5rem] bg-[linear-gradient(135deg,#047857,#111827)] text-white sm:w-48">
                         <svg class="h-14 w-14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

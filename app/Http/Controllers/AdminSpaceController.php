@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Space;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -41,7 +42,8 @@ class AdminSpaceController extends Controller
             'price_per_hour' => ['nullable', 'numeric'],
             'description' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'image' => ['nullable'],
+            'images' => ['nullable', 'array', 'max:3'],
+            'images.*' => ['image', 'max:5120'],
             'is_active' => ['sometimes', 'boolean'],
             'availabilities' => ['nullable', 'array'],
             'availabilities.*.enabled' => ['nullable', 'boolean'],
@@ -50,10 +52,12 @@ class AdminSpaceController extends Controller
             'availabilities.*.end_time' => ['nullable', 'date_format:H:i'],
         ]);
 
-        $spaceData = collect($validated)->except(['availabilities', 'image'])->all();
+        $spaceData = collect($validated)->except(['availabilities', 'images'])->all();
 
-        if ($request->hasFile('image')) {
-            $spaceData['image'] = $request->file('image')->store('spaces', 'public');
+        if ($request->hasFile('images')) {
+            $storedImages = $this->storeUploadedImages($request->file('images'));
+            $spaceData['images'] = $storedImages;
+            $spaceData['image'] = $storedImages[0] ?? null;
         }
 
         $space = Space::query()->create([
@@ -95,7 +99,8 @@ class AdminSpaceController extends Controller
             'price_per_hour' => ['nullable', 'numeric'],
             'description' => ['nullable', 'string'],
             'rules' => ['nullable', 'string'],
-            'image' => ['nullable'],
+            'images' => ['nullable', 'array', 'max:3'],
+            'images.*' => ['image', 'max:5120'],
             'is_active' => ['sometimes', 'boolean'],
             'availabilities' => ['nullable', 'array'],
             'availabilities.*.enabled' => ['nullable', 'boolean'],
@@ -104,14 +109,18 @@ class AdminSpaceController extends Controller
             'availabilities.*.end_time' => ['nullable', 'date_format:H:i'],
         ]);
 
-        $spaceData = collect($validated)->except(['availabilities', 'image'])->all();
+        $spaceData = collect($validated)->except(['availabilities', 'images'])->all();
 
         if ($space->name !== $validated['name']) {
             $spaceData['slug'] = $this->uniqueSlug($validated['name'], $space->id);
         }
 
-        if ($request->hasFile('image')) {
-            $spaceData['image'] = $request->file('image')->store('spaces', 'public');
+        if ($request->hasFile('images')) {
+            $this->deleteStoredImages($space);
+
+            $storedImages = $this->storeUploadedImages($request->file('images'));
+            $spaceData['images'] = $storedImages;
+            $spaceData['image'] = $storedImages[0] ?? null;
         }
 
         $space->update($spaceData);
@@ -125,6 +134,7 @@ class AdminSpaceController extends Controller
         if ($space->reservations()->exists()) {
             $space->update(['is_active' => false]);
         } else {
+            $this->deleteStoredImages($space);
             $space->delete();
         }
 
@@ -181,6 +191,31 @@ class AdminSpaceController extends Controller
                     'end_time' => $availability['end_time'],
                 ]
             );
+        }
+    }
+
+    protected function storeUploadedImages(array $files): array
+    {
+        return collect($files)
+            ->take(3)
+            ->map(fn ($file) => $file->store('spaces', 'public'))
+            ->values()
+            ->all();
+    }
+
+    protected function deleteStoredImages(Space $space): void
+    {
+        $storedImages = json_decode($space->getRawOriginal('images') ?? '[]', true);
+        $storedImages = is_array($storedImages) ? $storedImages : [];
+
+        if ($storedImages === [] && filled($space->getRawOriginal('image'))) {
+            $storedImages = [$space->getRawOriginal('image')];
+        }
+
+        foreach ($storedImages as $path) {
+            if (filled($path)) {
+                Storage::disk('public')->delete($path);
+            }
         }
     }
 }

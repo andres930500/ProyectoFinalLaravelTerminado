@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -28,6 +29,7 @@ class Space extends Model
         'rules',
         'price_per_hour',
         'image',
+        'images',
         'is_active',
     ];
 
@@ -90,6 +92,43 @@ class Space extends Model
         }
 
         return Number::currency($price, 'COP', locale: 'es_CO');
+    }
+
+    public function getImageAttribute(?string $value): ?string
+    {
+        if (filled($value)) {
+            return $this->normalizeImagePath($value);
+        }
+
+        $images = $this->decodeStoredImages($this->attributes['images'] ?? null);
+
+        return $this->normalizeImagePath($images[0] ?? null);
+    }
+
+    public function getImagesAttribute(mixed $value): array
+    {
+        $images = $this->decodeStoredImages($value);
+
+        if ($images === [] && filled($this->attributes['image'] ?? null)) {
+            $images = [$this->attributes['image']];
+        }
+
+        return array_values(array_filter(
+            array_map(fn (?string $path) => $this->normalizeImagePath($path), $images)
+        ));
+    }
+
+    public function setImagesAttribute(mixed $value): void
+    {
+        $images = collect(is_array($value) ? $value : [])
+            ->filter(fn ($item) => filled($item))
+            ->take(3)
+            ->values()
+            ->all();
+
+        $this->attributes['images'] = $images === []
+            ? null
+            : json_encode($images, JSON_UNESCAPED_SLASHES);
     }
 
     public function scopeActive(Builder $query): Builder
@@ -221,5 +260,33 @@ class Space extends Model
         }
 
         return $candidate->copy()->addMinutes($slotMinutes - $remainder)->second(0);
+    }
+
+    protected function decodeStoredImages(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (! is_string($value) || blank($value)) {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    protected function normalizeImagePath(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+            return $path;
+        }
+
+        return Storage::disk('public')->url($path);
     }
 }
