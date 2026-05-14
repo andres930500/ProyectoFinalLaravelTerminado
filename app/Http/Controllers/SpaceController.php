@@ -46,7 +46,10 @@ class SpaceController extends Controller
         $nextAvailableSlots = $space->getNextAvailableSlots(10);
         $defaultSlot = $nextAvailableSlots[0] ?? null;
         $selectedDate = $request->query('date', $defaultSlot ? $defaultSlot['start']->toDateString() : now()->toDateString());
-        $selectedTime = $request->query('time', $defaultSlot ? $defaultSlot['start']->format('H:i') : '08:00');
+        $selectedTime = $request->query('time', $defaultSlot ? $defaultSlot['start']->format('H:i') : '');
+        $selectedDay = $this->resolveSelectedDay($selectedDate, $defaultSlot['start'] ?? null);
+        $selectedDate = $selectedDay->toDateString();
+        $dailySlots = collect($space->getDailyReservationSlots($selectedDay))->values();
 
         $nextSlots = collect($nextAvailableSlots)
             ->map(fn (array $slot) => [
@@ -60,8 +63,6 @@ class SpaceController extends Controller
                 ),
             ])
             ->values();
-
-        $availabilityCheck = $this->buildAvailabilityCheck($space, $selectedDate, $selectedTime);
 
         $availabilities = $space->availabilities
             ->groupBy('day_of_week')
@@ -79,37 +80,19 @@ class SpaceController extends Controller
         return Inertia::render('Spaces/Show', [
             'space' => $space,
             'nextSlots' => $nextSlots,
+            'dailySlots' => $dailySlots,
             'availabilities' => $availabilities,
-            'availabilityCheck' => $availabilityCheck,
             'selectedDate' => $selectedDate,
             'selectedTime' => $selectedTime,
         ]);
     }
 
-    protected function buildAvailabilityCheck(Space $space, string $date, string $time): array
+    protected function resolveSelectedDay(string $selectedDate, ?Carbon $fallbackStart = null): Carbon
     {
         try {
-            $start = Carbon::createFromFormat('Y-m-d H:i', "{$date} {$time}");
-            $end = $start->copy()->addMinutes(max(1, (int) env('RESERVATION_SLOT_MINUTES', 60)));
-            $available = $space->isAvailableForSlot($start, $end);
-
-            return [
-                'date' => $date,
-                'time' => $time,
-                'start' => $start->toDateTimeString(),
-                'end' => $end->toDateTimeString(),
-                'available' => $available,
-                'message' => $available
-                    ? 'El horario seleccionado esta disponible para reserva.'
-                    : 'El horario seleccionado no esta disponible.',
-            ];
+            return Carbon::parse($selectedDate)->startOfDay();
         } catch (\Throwable) {
-            return [
-                'date' => $date,
-                'time' => $time,
-                'available' => false,
-                'message' => 'La fecha u hora indicada no tiene un formato valido.',
-            ];
+            return ($fallbackStart ?? now())->copy()->startOfDay();
         }
     }
 }

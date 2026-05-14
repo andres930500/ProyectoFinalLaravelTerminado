@@ -19,8 +19,8 @@ function destroyBlockedSlot(id) {
         <template #header>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Bloqueos</div>
-                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Restricciones manuales</h2>
+                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Bloqueos</div>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Restricciones manuales</h2>
                 </div>
                 <Link :href="route('admin.blocked-slots.create')" class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400">
                     Nuevo Bloqueo

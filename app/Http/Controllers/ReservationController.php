@@ -48,6 +48,12 @@ class ReservationController extends Controller
         $slotMinutes = $this->slotMinutes();
         $endTime = $startTime->copy()->addMinutes($slotMinutes);
 
+        if (! $space->isStartAlignedToSlot($startTime)) {
+            return redirect()->back()->withErrors([
+                'start' => 'Debes seleccionar un bloque horario completo y alineado.',
+            ]);
+        }
+
         if (! $space->isAvailableForSlot($startTime, $endTime)) {
             return redirect()->back()->withErrors([
                 'availability' => 'El horario seleccionado ya no esta disponible.',
@@ -71,8 +77,15 @@ class ReservationController extends Controller
         $startTime = Carbon::parse($validated['start_time']);
         $endTime = Carbon::parse($validated['end_time']);
         $slotMinutes = $this->slotMinutes();
+        $durationInMinutes = (int) round($startTime->diffInMinutes($endTime));
 
-        if ($startTime->diffInMinutes($endTime) !== $slotMinutes) {
+        if (! $space->isStartAlignedToSlot($startTime)) {
+            return back()->withInput()->withErrors([
+                'slot_alignment' => 'La reserva debe iniciar en un bloque exacto del sistema.',
+            ]);
+        }
+
+        if ($durationInMinutes !== $slotMinutes) {
             return back()->withInput()->withErrors([
                 'duration' => "La reserva debe durar exactamente {$slotMinutes} minutos.",
             ]);

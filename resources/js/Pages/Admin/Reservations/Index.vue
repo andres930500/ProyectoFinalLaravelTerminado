@@ -9,6 +9,7 @@ const props = defineProps({
     spaces: Array,
     filters: Object,
     statuses: Array,
+    summary: Object,
 });
 
 const filterForm = useForm({
@@ -98,14 +99,32 @@ function submitAction() {
     <AppLayout title="Reservas">
         <template #header>
             <div>
-                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Reservas</div>
-                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Control de solicitudes</h2>
-                <p class="mt-2 text-sm text-slate-300">Filtra por estado, espacio y fecha para operar rapido.</p>
+                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Reservas</div>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Control de solicitudes</h2>
+                <p class="mt-2 text-sm text-slate-600">Filtra por estado, espacio y fecha para operar rapido.</p>
             </div>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+                <section class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5 shadow-xl shadow-amber-100/40">
+                        <div class="text-xs font-semibold uppercase tracking-[0.25em] text-amber-700">Pendientes</div>
+                        <div class="mt-3 text-3xl font-semibold text-slate-900">{{ summary.pending }}</div>
+                        <p class="mt-2 text-sm text-slate-600">Estas solicitudes aparecen primero para aprobar o rechazar rapido.</p>
+                    </div>
+                    <div class="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-5 shadow-xl shadow-emerald-100/40">
+                        <div class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">Confirmadas</div>
+                        <div class="mt-3 text-3xl font-semibold text-slate-900">{{ summary.confirmed }}</div>
+                        <p class="mt-2 text-sm text-slate-600">Reservas ya aceptadas por el equipo administrativo.</p>
+                    </div>
+                    <div class="rounded-[1.75rem] border border-sky-200 bg-sky-50 p-5 shadow-xl shadow-sky-100/40">
+                        <div class="text-xs font-semibold uppercase tracking-[0.25em] text-sky-700">Solicitudes de hoy</div>
+                        <div class="mt-3 text-3xl font-semibold text-slate-900">{{ summary.today }}</div>
+                        <p class="mt-2 text-sm text-slate-600">Nuevas reservas creadas en la jornada actual.</p>
+                    </div>
+                </section>
+
                 <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
                     <div class="grid gap-4 md:grid-cols-4">
                         <select v-model="filterForm.space_id" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500" @change="applyFilters">

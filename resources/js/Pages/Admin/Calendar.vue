@@ -46,9 +46,9 @@ function formatRange(start, end) {
     <AppLayout title="Calendario">
         <template #header>
             <div>
-                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Calendario</div>
-                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Vista semanal operativa</h2>
-                <p class="mt-2 text-sm text-slate-300">Reserva, bloqueo y disponibilidad por espacio en una sola pantalla.</p>
+                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Calendario</div>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Vista semanal operativa</h2>
+                <p class="mt-2 text-sm text-slate-600">Reserva, bloqueo y disponibilidad por espacio en una sola pantalla.</p>
             </div>
         </template>
 

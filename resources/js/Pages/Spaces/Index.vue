@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 
@@ -46,6 +46,16 @@ const features = [
     },
 ];
 
+const activeSlides = ref({});
+const visibleCards = ref(3);
+const cardStartIndex = ref(0);
+let carouselTimer = null;
+
+const normalizedSpaces = computed(() => props.spaces.map((space) => ({
+    ...space,
+    gallery: resolveGallery(space),
+})));
+
 function applyFilter(type) {
     router.get('/', type ? { type } : {}, {
         preserveState: true,
@@ -72,6 +82,118 @@ function typeBadgeClass(type) {
         cancha_futbol_playa: 'text-amber-300',
     }[type] ?? 'text-emerald-300';
 }
+
+function updateVisibleCards() {
+    if (typeof window === 'undefined') return;
+
+    if (window.innerWidth >= 1280) {
+        visibleCards.value = 3;
+        return;
+    }
+
+    if (window.innerWidth >= 768) {
+        visibleCards.value = 2;
+        return;
+    }
+
+    visibleCards.value = 1;
+}
+
+function maxCardStart() {
+    return Math.max(normalizedSpaces.value.length - visibleCards.value, 0);
+}
+
+function syncCardViewport() {
+    cardStartIndex.value = Math.min(cardStartIndex.value, maxCardStart());
+}
+
+function showNextCards() {
+    cardStartIndex.value = Math.min(cardStartIndex.value + 1, maxCardStart());
+}
+
+function showPreviousCards() {
+    cardStartIndex.value = Math.max(cardStartIndex.value - 1, 0);
+}
+
+function resolveGallery(space) {
+    if (Array.isArray(space.images) && space.images.length) {
+        return space.images;
+    }
+
+    return space.image ? [space.image] : [];
+}
+
+function currentSlide(space) {
+    return activeSlides.value[space.id] ?? 0;
+}
+
+function setSlide(spaceId, index) {
+    activeSlides.value = {
+        ...activeSlides.value,
+        [spaceId]: index,
+    };
+}
+
+function syncSlideState() {
+    const nextState = {};
+
+    normalizedSpaces.value.forEach((space) => {
+        const maxIndex = Math.max(space.gallery.length - 1, 0);
+        nextState[space.id] = Math.min(activeSlides.value[space.id] ?? 0, maxIndex);
+    });
+
+    activeSlides.value = nextState;
+}
+
+function advanceSlides() {
+    if (!normalizedSpaces.value.length) return;
+
+    const nextState = { ...activeSlides.value };
+
+    normalizedSpaces.value.forEach((space) => {
+        if (space.gallery.length <= 1) return;
+
+        const currentIndex = nextState[space.id] ?? 0;
+        nextState[space.id] = (currentIndex + 1) % space.gallery.length;
+    });
+
+    activeSlides.value = nextState;
+}
+
+function startCarousel() {
+    stopCarousel();
+
+    carouselTimer = window.setInterval(() => {
+        advanceSlides();
+    }, 3500);
+}
+
+function stopCarousel() {
+    if (carouselTimer) {
+        window.clearInterval(carouselTimer);
+        carouselTimer = null;
+    }
+}
+
+watch(normalizedSpaces, () => {
+    syncSlideState();
+    syncCardViewport();
+}, { immediate: true });
+
+onMounted(() => {
+    updateVisibleCards();
+    window.addEventListener('resize', updateVisibleCards);
+    startCarousel();
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateVisibleCards);
+    stopCarousel();
+});
+
+watch(visibleCards, () => {
+    syncCardViewport();
+});
 </script>
 
 <template>
@@ -153,19 +275,64 @@ function typeBadgeClass(type) {
                     </button>
                 </div>
             </div>
-            <div v-if="spaces.length" class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
-                <article
-                    v-for="space in spaces"
-                    :key="space.id"
-                    class="flex h-full flex-col overflow-hidden rounded-2xl border border-emerald-200 bg-white/95 shadow-lg shadow-emerald-100/60 transition-all hover:-translate-y-1 hover:border-[#00C853] hover:shadow-xl"
-                >
-                    <div class="relative">
-                        <img
-                            v-if="space.image"
-                            :src="space.image"
-                            :alt="space.name"
-                            class="h-44 w-full object-cover"
+            <div v-if="spaces.length" class="mt-5">
+                <div class="mb-4 flex items-center justify-between gap-3">
+                    <p class="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                        Mostrando {{ Math.min(visibleCards, normalizedSpaces.length) }} de {{ normalizedSpaces.length }} canchas
+                    </p>
+                    <div v-if="normalizedSpaces.length > visibleCards" class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white text-slate-700 transition hover:border-[#00C853] hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                            :disabled="cardStartIndex === 0"
+                            @click="showPreviousCards"
                         >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-white text-slate-700 transition hover:border-[#00C853] hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                            :disabled="cardStartIndex >= maxCardStart()"
+                            @click="showNextCards"
+                        >
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden">
+                    <div
+                        class="flex gap-5 transition-transform duration-500 ease-out"
+                        :style="{ transform: `translateX(calc(-${cardStartIndex * (100 / visibleCards)}% - ${cardStartIndex * (20 / visibleCards)}px))` }"
+                    >
+                        <article
+                            v-for="space in normalizedSpaces"
+                            :key="space.id"
+                            class="flex h-full shrink-0 flex-col overflow-hidden rounded-2xl border border-emerald-200 bg-white/95 shadow-lg shadow-emerald-100/60 transition-all hover:-translate-y-1 hover:border-[#00C853] hover:shadow-xl"
+                            :class="{
+                                'basis-full': visibleCards === 1,
+                                'basis-[calc(50%-10px)]': visibleCards === 2,
+                                'basis-[calc(33.333%-13.333px)]': visibleCards === 3,
+                            }"
+                        >
+                    <div class="relative h-44 overflow-hidden bg-slate-200">
+                        <div
+                            v-if="space.gallery.length"
+                            class="flex h-full transition-transform duration-700 ease-out"
+                            :style="{ transform: `translateX(-${currentSlide(space) * 100}%)` }"
+                        >
+                            <img
+                                v-for="(image, imageIndex) in space.gallery"
+                                :key="`${space.id}-${imageIndex}`"
+                                :src="image"
+                                :alt="`${space.name} ${imageIndex + 1}`"
+                                class="h-44 w-full shrink-0 object-cover"
+                            >
+                        </div>
                         <div v-else class="flex h-44 w-full items-center justify-center bg-[linear-gradient(135deg,#12b76a,#123524)]">
                             <div class="flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-white/15 text-white">
                                 <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -174,12 +341,26 @@ function typeBadgeClass(type) {
                                 </svg>
                             </div>
                         </div>
+                        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/35 via-slate-950/10 to-transparent"></div>
                         <span class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs backdrop-blur" :class="typeBadgeClass(space.type)">
                             {{ typeLabels[space.type] ?? space.type }}
                         </span>
                         <span class="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-sm font-bold text-emerald-700 backdrop-blur">
                             {{ formatCurrency(space.price_per_hour) }}
                         </span>
+                        <div
+                            v-if="space.gallery.length > 1"
+                            class="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-slate-950/55 px-3 py-1.5 backdrop-blur-sm"
+                        >
+                            <button
+                                v-for="(image, imageIndex) in space.gallery"
+                                :key="`${space.id}-dot-${imageIndex}`"
+                                type="button"
+                                class="h-2.5 rounded-full transition-all duration-300"
+                                :class="currentSlide(space) === imageIndex ? 'w-6 bg-[#d4fc79]' : 'w-2.5 bg-white/60 hover:bg-white'"
+                                @click="setSlide(space.id, imageIndex)"
+                            ></button>
+                        </div>
                     </div>
 
                     <div class="flex flex-1 flex-col p-4">
@@ -208,7 +389,20 @@ function typeBadgeClass(type) {
                             Ver disponibilidad
                         </Link>
                     </div>
-                </article>
+                        </article>
+                    </div>
+                </div>
+
+                <div v-if="normalizedSpaces.length > visibleCards" class="mt-4 flex justify-center gap-2">
+                    <button
+                        v-for="index in maxCardStart() + 1"
+                        :key="`card-page-${index - 1}`"
+                        type="button"
+                        class="h-2.5 rounded-full transition-all duration-300"
+                        :class="cardStartIndex === index - 1 ? 'w-8 bg-emerald-500' : 'w-2.5 bg-emerald-200 hover:bg-emerald-300'"
+                        @click="cardStartIndex = index - 1"
+                    ></button>
+                </div>
             </div>
 
             <div v-else class="mt-5 rounded-2xl border border-dashed border-emerald-300 bg-white/90 px-6 py-12 text-center text-slate-500">

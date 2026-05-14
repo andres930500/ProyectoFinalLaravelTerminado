@@ -118,21 +118,21 @@ function formatDateTime(value) {
 function customerBadge(total) {
     if (total >= 6) {
         return {
-            label: 'Frecuente★',
-            classes: 'bg-emerald-100 text-emerald-800',
+            label: 'Frecuente',
+            classes: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
         };
     }
 
     if (total >= 3) {
         return {
             label: 'Regular',
-            classes: 'bg-sky-100 text-sky-800',
+            classes: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200',
         };
     }
 
     return {
         label: 'Nuevo',
-        classes: 'bg-amber-100 text-amber-800',
+        classes: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
     };
 }
 
@@ -161,30 +161,30 @@ function exportCsv() {
         <template #header>
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Reportes</div>
-                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Analitica de reservas</h2>
-                    <p class="mt-2 text-sm text-slate-300">Mide conversion, horas pico, rendimiento por cancha y clientes recurrentes.</p>
+                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Reportes</div>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Analitica de reservas</h2>
+                    <p class="mt-2 text-sm text-slate-600">Mide conversion, horas pico, rendimiento por cancha y clientes recurrentes.</p>
                 </div>
             </div>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-                <section class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Desde</label>
-                                <input v-model="form.from" type="date" class="mt-2 block w-full rounded-2xl border border-[#1e3a24] bg-[#0d1711] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0">
+                                <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Desde</label>
+                                <input v-model="form.from" type="date" class="mt-2 block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-0">
                             </div>
                             <div>
-                                <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Hasta</label>
-                                <input v-model="form.to" type="date" class="mt-2 block w-full rounded-2xl border border-[#1e3a24] bg-[#0d1711] px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0">
+                                <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Hasta</label>
+                                <input v-model="form.to" type="date" class="mt-2 block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-0">
                             </div>
                         </div>
 
                         <div class="flex flex-col gap-3 sm:flex-row">
-                            <button type="button" class="inline-flex items-center justify-center rounded-2xl border border-[#1e3a24] bg-[#0d1711] px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-[#132218]" @click="applyFilters">
+                            <button type="button" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50" @click="applyFilters">
                                 Aplicar filtro
                             </button>
                             <button type="button" class="inline-flex items-center justify-center rounded-2xl bg-[#00C853] px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#00b84c]" @click="exportCsv">
@@ -195,45 +195,45 @@ function exportCsv() {
                 </section>
 
                 <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
-                        <div class="text-sm text-slate-400">Total reservas</div>
-                        <div class="mt-4 text-4xl font-semibold text-white">{{ totalReservaciones }}</div>
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
+                        <div class="text-sm text-slate-500">Total reservas</div>
+                        <div class="mt-4 text-3xl font-semibold text-slate-950">{{ totalReservaciones }}</div>
                     </article>
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
-                        <div class="text-sm text-slate-400">Ingresos totales</div>
-                        <div class="mt-4 text-4xl font-semibold text-white">{{ formatCurrency(ingresosTotales) }}</div>
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
+                        <div class="text-sm text-slate-500">Ingresos totales</div>
+                        <div class="mt-4 text-3xl font-semibold text-slate-950">{{ formatCurrency(ingresosTotales) }}</div>
                     </article>
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
-                        <div class="text-sm text-slate-400">Tasa conversion</div>
-                        <div class="mt-4 text-4xl font-semibold text-white">{{ tasaConversion }}%</div>
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
+                        <div class="text-sm text-slate-500">Tasa conversion</div>
+                        <div class="mt-4 text-3xl font-semibold text-slate-950">{{ tasaConversion }}%</div>
                     </article>
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
-                        <div class="text-sm text-slate-400">Promedio por dia</div>
-                        <div class="mt-4 text-4xl font-semibold text-white">{{ promedioPorDia }}</div>
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
+                        <div class="text-sm text-slate-500">Promedio por dia</div>
+                        <div class="mt-4 text-3xl font-semibold text-slate-950">{{ promedioPorDia }}</div>
                     </article>
                 </section>
 
                 <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
                         <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-white">Ranking de canchas</h3>
-                            <p class="mt-1 text-sm text-slate-400">Ordenadas por reservas confirmadas dentro del rango.</p>
+                            <h3 class="text-lg font-semibold text-slate-950">Ranking de canchas</h3>
+                            <p class="mt-1 text-sm text-slate-500">Ordenadas por reservas confirmadas dentro del rango.</p>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="grid gap-4 md:grid-cols-2">
                             <div
                                 v-for="space in rankingCanchas"
                                 :key="space.id"
-                                class="rounded-2xl border border-[#1e3a24] bg-[#0d1711] p-4"
+                                class="rounded-[1.4rem] border border-slate-200 bg-slate-50 p-4"
                             >
                                 <div class="flex items-start justify-between gap-4">
                                     <div>
-                                        <div class="font-medium text-white">{{ space.name }}</div>
-                                        <div class="mt-1 text-sm text-slate-400">{{ space.total }} confirmadas</div>
+                                        <div class="font-medium text-slate-950">{{ space.name }}</div>
+                                        <div class="mt-1 text-sm text-slate-500">{{ space.total }} confirmadas</div>
                                     </div>
-                                    <div class="text-right text-sm text-emerald-300">{{ formatCurrency(space.ingresos) }}</div>
+                                    <div class="text-right text-sm font-medium text-emerald-700">{{ formatCurrency(space.ingresos) }}</div>
                                 </div>
-                                <div class="mt-4 h-3 overflow-hidden rounded-full bg-white/5">
+                                <div class="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
                                     <div
                                         class="h-full rounded-full bg-[#00C853]"
                                         :style="{ width: `${(space.total / maxRanking) * 100}%` }"
@@ -243,10 +243,10 @@ function exportCsv() {
                         </div>
                     </article>
 
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
                         <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-white">Horas mas activas</h3>
-                            <p class="mt-1 text-sm text-slate-400">Comportamiento por hora segun inicio de reserva.</p>
+                            <h3 class="text-lg font-semibold text-slate-950">Horas mas activas</h3>
+                            <p class="mt-1 text-sm text-slate-500">Comportamiento por hora segun inicio de reserva.</p>
                         </div>
                         <div class="h-[26rem]">
                             <Bar :data="horasActivasData" :options="horasActivasOptions" />
@@ -254,16 +254,16 @@ function exportCsv() {
                     </article>
                 </section>
 
-                <section class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                <section class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/40">
                     <div class="mb-5">
-                        <h3 class="text-lg font-semibold text-white">Clientes frecuentes</h3>
-                        <p class="mt-1 text-sm text-slate-400">Top 10 usuarios por correo dentro del rango filtrado.</p>
+                        <h3 class="text-lg font-semibold text-slate-950">Clientes frecuentes</h3>
+                        <p class="mt-1 text-sm text-slate-500">Top 10 usuarios por correo dentro del rango filtrado.</p>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-[#1e3a24] text-sm">
-                            <thead>
-                                <tr class="text-left text-slate-400">
+                        <table class="min-w-full divide-y divide-slate-200 text-sm">
+                            <thead class="bg-slate-50">
+                                <tr class="text-left text-slate-500">
                                     <th class="px-4 py-3 font-semibold">Cliente</th>
                                     <th class="px-4 py-3 font-semibold">Email</th>
                                     <th class="px-4 py-3 font-semibold">Reservas</th>
@@ -271,12 +271,12 @@ function exportCsv() {
                                     <th class="px-4 py-3 font-semibold">Perfil</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-[#1e3a24]">
+                            <tbody class="divide-y divide-slate-200">
                                 <tr v-for="customer in clientesFrecuentes" :key="customer.user_email">
-                                    <td class="px-4 py-4 text-white">{{ customer.user_name }}</td>
-                                    <td class="px-4 py-4 text-slate-300">{{ customer.user_email }}</td>
-                                    <td class="px-4 py-4 text-slate-300">{{ customer.total_reservas }}</td>
-                                    <td class="px-4 py-4 text-slate-300">{{ formatDateTime(customer.ultima_reserva) }}</td>
+                                    <td class="px-4 py-4 text-slate-950">{{ customer.user_name }}</td>
+                                    <td class="px-4 py-4 text-slate-600">{{ customer.user_email }}</td>
+                                    <td class="px-4 py-4 text-slate-600">{{ customer.total_reservas }}</td>
+                                    <td class="px-4 py-4 text-slate-600">{{ formatDateTime(customer.ultima_reserva) }}</td>
                                     <td class="px-4 py-4">
                                         <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="customerBadge(customer.total_reservas).classes">
                                             {{ customerBadge(customer.total_reservas).label }}
@@ -284,7 +284,7 @@ function exportCsv() {
                                     </td>
                                 </tr>
                                 <tr v-if="!clientesFrecuentes.length">
-                                    <td colspan="5" class="px-4 py-8 text-center text-slate-400">No hay clientes dentro del rango seleccionado.</td>
+                                    <td colspan="5" class="px-4 py-8 text-center text-slate-500">No hay clientes dentro del rango seleccionado.</td>
                                 </tr>
                             </tbody>
                         </table>

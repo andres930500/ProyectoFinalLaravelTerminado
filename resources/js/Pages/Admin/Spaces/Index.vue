@@ -45,9 +45,9 @@ function destroySpace(space) {
         <template #header>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Espacios</div>
-                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Gestion de canchas</h2>
-                    <p class="mt-2 text-sm text-slate-300">Administra estado, capacidad, precio y disponibilidad semanal.</p>
+                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Espacios</div>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Gestion de canchas</h2>
+                    <p class="mt-2 text-sm text-slate-600">Administra estado, capacidad, precio y disponibilidad semanal.</p>
                 </div>
                 <Link :href="route('admin.spaces.create')" class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400">
                     Nueva Cancha

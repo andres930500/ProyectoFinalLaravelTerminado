@@ -100,7 +100,7 @@ function submit() {
                         <InputError class="mt-2" :message="form.errors.notes" />
                     </div>
 
-                    <InputError class="mt-2" :message="form.errors.space_id || form.errors.start_time || form.errors.end_time || form.errors.duration || form.errors.availability || form.errors.collision || form.errors.blocked_slot" />
+                    <InputError class="mt-2" :message="form.errors.space_id || form.errors.start_time || form.errors.end_time || form.errors.duration || form.errors.slot_alignment || form.errors.availability || form.errors.collision || form.errors.blocked_slot" />
 
                     <div class="flex flex-col gap-3 sm:flex-row">
                         <button

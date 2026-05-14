@@ -24,13 +24,22 @@ class AdminReservationController extends Controller
             ->when($filters['status'] ?? null, fn ($query, $status) => $query->byStatus($status))
             ->when($filters['space_id'] ?? null, fn ($query, $spaceId) => $query->bySpace($spaceId))
             ->when($filters['date'] ?? null, fn ($query, $date) => $query->byDate($date))
-            ->orderByDesc('start_time')
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 0 WHEN status = 'confirmed' THEN 1 ELSE 2 END")
+            ->orderByDesc('created_at')
+            ->orderBy('start_time')
             ->paginate(15)
             ->withQueryString();
+
+        $summary = [
+            'pending' => Reservation::query()->where('status', 'pending')->count(),
+            'today' => Reservation::query()->whereDate('created_at', now()->toDateString())->count(),
+            'confirmed' => Reservation::query()->where('status', 'confirmed')->count(),
+        ];
 
         return Inertia::render('Admin/Reservations/Index', [
             'reservations' => $reservations,
             'filters' => $filters,
+            'summary' => $summary,
             'spaces' => Space::query()->orderBy('name')->get(['id', 'name', 'slug']),
             'statuses' => ['pending', 'confirmed', 'rejected', 'cancelled', 'finished'],
         ]);

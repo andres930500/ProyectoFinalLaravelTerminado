@@ -177,7 +177,7 @@ class Space extends Model
     public function getNextAvailableSlots(int $count = 5): array
     {
         $count = max(1, $count);
-        $slotMinutes = max(1, (int) env('RESERVATION_SLOT_MINUTES', 60));
+        $slotMinutes = $this->slotMinutes();
         $now = now();
         $slots = [];
 
@@ -203,10 +203,10 @@ class Space extends Model
                     continue;
                 }
 
-                $cursor = $rangeStart->copy();
+                $cursor = $this->alignToDaySlotBoundary($rangeStart->copy());
 
                 if ($date->isToday() && $cursor->lessThan($now)) {
-                    $cursor = $this->alignToSlotBoundary($now->copy(), $rangeStart, $slotMinutes);
+                    $cursor = $this->alignToDaySlotBoundary($now->copy());
                 }
 
                 while ($cursor->copy()->addMinutes($slotMinutes)->lessThanOrEqualTo($rangeEnd) && count($slots) < $count) {
@@ -228,6 +228,99 @@ class Space extends Model
         return $slots;
     }
 
+    public function getDailyReservationSlots(Carbon $date): array
+    {
+        $slotMinutes = $this->slotMinutes();
+        $slots = [];
+
+        if (! $this->is_active) {
+            return [];
+        }
+
+        $dayAvailabilities = $this->availabilities()
+            ->where('day_of_week', $date->dayOfWeek)
+            ->orderBy('start_time')
+            ->get();
+
+        if ($dayAvailabilities->isEmpty()) {
+            return [];
+        }
+
+        $reservations = $this->reservations()
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereDate('start_time', $date->toDateString())
+            ->get();
+
+        $blockedSlots = $this->blockedSlots()
+            ->whereDate('start_time', $date->toDateString())
+            ->get();
+
+        foreach ($dayAvailabilities as $availability) {
+            $rangeStart = Carbon::parse($date->toDateString().' '.$availability->start_time);
+            $rangeEnd = Carbon::parse($date->toDateString().' '.$availability->end_time);
+
+            if ($rangeEnd->lessThanOrEqualTo($rangeStart)) {
+                continue;
+            }
+
+            $cursor = $this->alignToDaySlotBoundary($rangeStart->copy());
+
+            while ($cursor->copy()->addMinutes($slotMinutes)->lessThanOrEqualTo($rangeEnd)) {
+                $slotStart = $cursor->copy();
+                $slotEnd = $cursor->copy()->addMinutes($slotMinutes);
+
+                $status = 'available';
+                $message = 'Disponible para reservar.';
+
+                if ($slotStart->lessThan(now())) {
+                    $status = 'past';
+                    $message = 'Horario no disponible porque ya paso.';
+                } else {
+                    $blocked = $blockedSlots->first(
+                        fn (BlockedSlot $blockedSlot) => $blockedSlot->start_time < $slotEnd && $blockedSlot->end_time > $slotStart
+                    );
+
+                    $reservation = $reservations->first(
+                        fn (Reservation $reservation) => $reservation->start_time < $slotEnd && $reservation->end_time > $slotStart
+                    );
+
+                    if ($blocked) {
+                        $status = 'blocked';
+                        $message = $blocked->reason
+                            ? 'No disponible: '.$blocked->reason
+                            : 'Horario bloqueado por administracion.';
+                    } elseif ($reservation) {
+                        $status = $reservation->status === 'confirmed' ? 'reserved_confirmed' : 'reserved_pending';
+                        $message = $reservation->status === 'confirmed'
+                            ? 'No disponible: ya fue reservada y confirmada.'
+                            : 'No disponible: hay una solicitud pendiente de aprobacion.';
+                    }
+                }
+
+                $slots[] = [
+                    'start' => $slotStart->toDateTimeString(),
+                    'end' => $slotEnd->toDateTimeString(),
+                    'time' => $slotStart->format('H:i'),
+                    'label' => sprintf('%s - %s', $slotStart->format('H:i'), $slotEnd->format('H:i')),
+                    'status' => $status,
+                    'is_available' => $status === 'available',
+                    'message' => $message,
+                ];
+
+                $cursor->addMinutes($slotMinutes);
+            }
+        }
+
+        return $slots;
+    }
+
+    public function isStartAlignedToSlot(Carbon $start): bool
+    {
+        $minutesFromMidnight = ((int) $start->format('G') * 60) + (int) $start->format('i');
+
+        return $minutesFromMidnight % $this->slotMinutes() === 0 && (int) $start->format('s') === 0;
+    }
+
     protected static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
         $baseSlug = Str::slug($name);
@@ -246,20 +339,24 @@ class Space extends Model
         return $slug;
     }
 
-    protected function alignToSlotBoundary(Carbon $candidate, Carbon $reference, int $slotMinutes): Carbon
+    protected function alignToDaySlotBoundary(Carbon $candidate): Carbon
     {
-        if ($candidate->lessThanOrEqualTo($reference)) {
-            return $reference->copy();
+        $slotMinutes = $this->slotMinutes();
+        $minutesFromMidnight = ((int) $candidate->format('G') * 60) + (int) $candidate->format('i');
+        $remainder = $minutesFromMidnight % $slotMinutes;
+
+        $aligned = $candidate->copy()->second(0);
+
+        if ($remainder !== 0) {
+            $aligned->addMinutes($slotMinutes - $remainder);
         }
 
-        $elapsedMinutes = $reference->diffInMinutes($candidate);
-        $remainder = $elapsedMinutes % $slotMinutes;
+        return $aligned;
+    }
 
-        if ($remainder === 0) {
-            return $candidate->copy()->second(0);
-        }
-
-        return $candidate->copy()->addMinutes($slotMinutes - $remainder)->second(0);
+    protected function slotMinutes(): int
+    {
+        return max(1, (int) env('RESERVATION_SLOT_MINUTES', 60));
     }
 
     protected function decodeStoredImages(mixed $value): array
@@ -283,10 +380,40 @@ class Space extends Model
             return null;
         }
 
-        if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+        if (Str::startsWith($path, '/')) {
             return $path;
         }
 
-        return Storage::disk('public')->url($path);
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $this->normalizeLocalAbsoluteUrl($path);
+        }
+
+        if (Str::startsWith($path, 'storage/')) {
+            return '/'.ltrim($path, '/');
+        }
+
+        if (Str::startsWith($path, 'public/')) {
+            return '/storage/'.ltrim(Str::after($path, 'public/'), '/');
+        }
+
+        return $this->normalizeLocalAbsoluteUrl(Storage::disk('public')->url($path));
+    }
+
+    protected function normalizeLocalAbsoluteUrl(string $url): string
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+        $path = parse_url($url, PHP_URL_PATH) ?: '/';
+        $query = parse_url($url, PHP_URL_QUERY);
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        $shouldUseRelativePath = in_array($host, ['localhost', '127.0.0.1', $appHost], true)
+            || ($host === null && $scheme === null);
+
+        if (! $shouldUseRelativePath) {
+            return $url;
+        }
+
+        return $query ? $path.'?'.$query : $path;
     }
 }
