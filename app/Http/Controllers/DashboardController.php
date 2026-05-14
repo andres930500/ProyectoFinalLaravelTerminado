@@ -5,19 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\Space;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $today = now();
         $weekStart = $today->copy()->startOfWeek(Carbon::MONDAY);
         $weekEnd = $today->copy()->endOfWeek(Carbon::SUNDAY);
         $monthStart = $today->copy()->startOfMonth();
         $monthEnd = $today->copy()->endOfMonth();
+        [$rangeStart, $rangeEnd] = $this->resolveDashboardRange($request);
+        $rangeEndInclusive = $rangeEnd->copy()->endOfDay();
 
         $pendingTodayCount = Reservation::query()
             ->byStatus('pending')
@@ -48,13 +51,14 @@ class DashboardController extends Controller
 
         $reservationsByDay = Reservation::query()
             ->selectRaw('DATE(created_at) as fecha, COUNT(*) as total')
-            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->whereBetween('created_at', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive])
             ->groupBy('fecha')
             ->orderBy('fecha')
             ->get();
 
         $reservationsByStatus = Reservation::query()
             ->selectRaw('status, COUNT(*) as total')
+            ->whereBetween('start_time', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive])
             ->groupBy('status')
             ->get();
 
@@ -63,8 +67,7 @@ class DashboardController extends Controller
             ->withCount([
                 'reservations as confirmadas' => fn ($query) => $query
                     ->where('status', 'confirmed')
-                    ->whereMonth('start_time', now()->month)
-                    ->whereYear('start_time', now()->year),
+                    ->whereBetween('start_time', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive]),
             ])
             ->orderBy('name')
             ->get();
@@ -72,7 +75,7 @@ class DashboardController extends Controller
         $weeklyIncome = Reservation::query()
             ->with('space:id,price_per_hour')
             ->where('status', 'confirmed')
-            ->where('start_time', '>=', now()->subDays(6)->startOfDay())
+            ->whereBetween('start_time', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive])
             ->orderBy('start_time')
             ->get()
             ->groupBy(fn (Reservation $reservation) => $reservation->start_time->toDateString())
@@ -122,7 +125,33 @@ class DashboardController extends Controller
             'spaceOccupancy' => $spaceOccupancy,
             'weeklyIncome' => $weeklyIncome,
             'estadoActual' => $estadoActual,
+            'selectedFrom' => $rangeStart->toDateString(),
+            'selectedTo' => $rangeEnd->toDateString(),
         ]);
+    }
+
+    protected function resolveDashboardRange(Request $request): array
+    {
+        $defaultFrom = now()->subDays(6)->startOfDay();
+        $defaultTo = now()->startOfDay();
+
+        try {
+            $from = Carbon::parse((string) $request->query('from', $defaultFrom->toDateString()))->startOfDay();
+        } catch (\Throwable) {
+            $from = $defaultFrom;
+        }
+
+        try {
+            $to = Carbon::parse((string) $request->query('to', $defaultTo->toDateString()))->startOfDay();
+        } catch (\Throwable) {
+            $to = $defaultTo;
+        }
+
+        if ($from->greaterThan($to)) {
+            [$from, $to] = [$to, $from];
+        }
+
+        return [$from, $to];
     }
 
     protected function resolveCurrentSpaceStatus(Space $space, Carbon $now): array

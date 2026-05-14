@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SpaceStatusWidget from '@/Components/SpaceStatusWidget.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import {
     ArcElement,
     BarElement,
@@ -15,7 +15,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { computed } from 'vue';
+import { computed, reactive, watch } from 'vue';
 import { Bar, Doughnut, Line } from 'vue-chartjs';
 
 ChartJS.register(
@@ -41,7 +41,16 @@ const props = defineProps({
     spaceOccupancy: Array,
     weeklyIncome: Array,
     estadoActual: Array,
+    selectedFrom: String,
+    selectedTo: String,
 });
+
+const filters = reactive({
+    from: props.selectedFrom,
+    to: props.selectedTo,
+});
+
+let filterUpdateTimeout = null;
 
 const statusClasses = {
     pending: 'bg-amber-100 text-amber-800',
@@ -91,21 +100,68 @@ function formatCurrency(value) {
     }).format(Number(value ?? 0));
 }
 
-function buildLastSevenDays(items, valueKey = 'total') {
+function buildRangeValues(items, from, to, valueKey = 'total') {
     const index = Object.fromEntries((items || []).map((item) => [item.fecha, Number(item[valueKey] ?? 0)]));
+    const start = new Date(`${from}T00:00:00`);
+    const end = new Date(`${to}T00:00:00`);
+    const values = [];
 
-    return Array.from({ length: 7 }, (_, offset) => {
-        const date = new Date();
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() - (6 - offset));
+    for (const date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
         const key = date.toISOString().slice(0, 10);
 
-        return {
+        values.push({
             label: formatShortDate(key),
             value: index[key] ?? 0,
-        };
+        });
+    }
+
+    return values;
+}
+
+function applyDateFilters() {
+    router.get(route('dashboard'), {
+        from: filters.from,
+        to: filters.to,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
     });
 }
+
+function setQuickRange(days) {
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+
+    filters.from = start.toISOString().slice(0, 10);
+    filters.to = end.toISOString().slice(0, 10);
+}
+
+function isQuickRangeActive(days) {
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+
+    const start = new Date(end);
+    start.setDate(start.getDate() - (days - 1));
+
+    return filters.from === start.toISOString().slice(0, 10)
+        && filters.to === end.toISOString().slice(0, 10);
+}
+
+watch(() => [filters.from, filters.to], ([nextFrom, nextTo]) => {
+    if (!nextFrom || !nextTo) return;
+    if (nextFrom === props.selectedFrom && nextTo === props.selectedTo) return;
+
+    if (filterUpdateTimeout) {
+        window.clearTimeout(filterUpdateTimeout);
+    }
+
+    filterUpdateTimeout = window.setTimeout(() => {
+        applyDateFilters();
+    }, 250);
+});
 
 const baseCartesianOptions = {
     responsive: true,
@@ -146,7 +202,7 @@ const baseCartesianOptions = {
 };
 
 const reservationsLineData = computed(() => {
-    const values = buildLastSevenDays(props.reservationsByDay);
+    const values = buildRangeValues(props.reservationsByDay, props.selectedFrom, props.selectedTo);
 
     return {
         labels: values.map((item) => item.label),
@@ -234,7 +290,7 @@ const occupancyBarOptions = computed(() => ({
 }));
 
 const weeklyIncomeData = computed(() => {
-    const values = buildLastSevenDays(props.weeklyIncome);
+    const values = buildRangeValues(props.weeklyIncome, props.selectedFrom, props.selectedTo);
 
     return {
         labels: values.map((item) => item.label),
@@ -286,6 +342,53 @@ const weeklyIncomeOptions = computed(() => ({
                     <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Resumen operativo</h2>
                     <p class="mt-2 text-sm text-slate-600">Estado actual de reservas, uso de espacios y actividad inmediata.</p>
                 </div>
+                <div class="rounded-[1.75rem] border border-emerald-100 bg-white/95 p-4 shadow-lg shadow-emerald-100/40">
+                    <div class="flex flex-col gap-4 xl:min-w-[420px]">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <div class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Rango analitico</div>
+                                <p class="mt-1 text-sm text-slate-500">Las graficas se actualizan automaticamente al cambiar el rango.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                    :class="isQuickRangeActive(7) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                    @click="setQuickRange(7)"
+                                >
+                                    7 dias
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                    :class="isQuickRangeActive(15) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                    @click="setQuickRange(15)"
+                                >
+                                    15 dias
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                    :class="isQuickRangeActive(30) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                    @click="setQuickRange(30)"
+                                >
+                                    30 dias
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <label class="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
+                                <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Desde</span>
+                                <input v-model="filters.from" type="date" class="mt-2 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
+                            </label>
+                            <label class="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
+                                <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Hasta</span>
+                                <input v-model="filters.to" type="date" class="mt-2 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
 
@@ -312,8 +415,8 @@ const weeklyIncomeOptions = computed(() => ({
                 <section class="grid gap-6 lg:grid-cols-2">
                     <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-slate-900">Reservas ultimos 7 dias</h3>
-                            <p class="mt-1 text-sm text-slate-500">Actividad reciente de creacion de reservas.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Reservas por rango</h3>
+                            <p class="mt-1 text-sm text-slate-500">Actividad reciente de creacion de reservas en el rango elegido.</p>
                         </div>
                         <div class="h-80">
                             <Line :data="reservationsLineData" :options="reservationsLineOptions" />
@@ -323,7 +426,7 @@ const weeklyIncomeOptions = computed(() => ({
                     <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
                             <h3 class="text-lg font-semibold text-slate-900">Reservas por estado</h3>
-                            <p class="mt-1 text-sm text-slate-500">Distribucion actual del flujo de solicitudes.</p>
+                            <p class="mt-1 text-sm text-slate-500">Distribucion del flujo de solicitudes en el rango elegido.</p>
                         </div>
                         <div class="h-80">
                             <Doughnut :data="statusDonutData" :options="statusDonutOptions" />
@@ -333,7 +436,7 @@ const weeklyIncomeOptions = computed(() => ({
                     <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
                             <h3 class="text-lg font-semibold text-slate-900">Reservas por cancha</h3>
-                            <p class="mt-1 text-sm text-slate-500">Confirmadas este mes por espacio activo.</p>
+                            <p class="mt-1 text-sm text-slate-500">Confirmadas por espacio activo dentro del rango elegido.</p>
                         </div>
                         <div class="h-80">
                             <Bar :data="occupancyBarData" :options="occupancyBarOptions" />
@@ -342,8 +445,8 @@ const weeklyIncomeOptions = computed(() => ({
 
                     <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-slate-900">Ingresos por semana</h3>
-                            <p class="mt-1 text-sm text-slate-500">Valor estimado de reservas confirmadas recientes.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Ingresos por rango</h3>
+                            <p class="mt-1 text-sm text-slate-500">Valor estimado de reservas confirmadas dentro del rango elegido.</p>
                         </div>
                         <div class="h-80">
                             <Bar :data="weeklyIncomeData" :options="weeklyIncomeOptions" />

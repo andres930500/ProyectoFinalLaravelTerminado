@@ -45,7 +45,9 @@ onBeforeUnmount(() => {
         <header class="sticky top-0 z-30 border-b border-slate-700 bg-[#2b302d]">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
                 <Link href="/" class="relative z-10 flex items-center gap-3 text-lg font-semibold text-slate-950">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00C853] font-bold text-black">RC</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white ring-1 ring-emerald-200">
+                        <img src="/images/ui/soccer-ball-logo.png" alt="ReservaCancha" class="h-7 w-7 object-contain">
+                    </span>
                     <span class="flex flex-col leading-tight">
                         <span class="text-sm text-white">ReservaCancha</span>
                         <span class="text-[11px] font-medium text-slate-300">Una cancha perfecta para tu partido</span>
@@ -134,7 +136,9 @@ onBeforeUnmount(() => {
                     <div class="grid gap-10 md:grid-cols-2 xl:grid-cols-4">
                 <div>
                     <div class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00C853] font-bold text-black">RC</span>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white ring-1 ring-emerald-200">
+                            <img src="/images/ui/soccer-ball-logo.png" alt="ReservaCancha" class="h-7 w-7 object-contain">
+                        </span>
                         <div>
                             <div class="font-semibold text-slate-950">ReservaCancha</div>
                             <div class="text-sm text-[#9CA3AF]">Sistema de reservas de canchas de futbol</div>

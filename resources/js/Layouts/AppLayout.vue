@@ -53,9 +53,9 @@ function contentRevealClasses() {
                             :class="sidebarCollapsed ? 'xl:justify-center xl:group-hover/sidebar:justify-start' : ''"
                         >
                             <div
-                                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/20"
+                                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-100"
                             >
-                                RC
+                                <img src="/images/ui/soccer-ball-logo.png" alt="ReservaCancha" class="h-9 w-9 object-contain">
                             </div>
                             <div :class="contentRevealClasses()">
                                 <div

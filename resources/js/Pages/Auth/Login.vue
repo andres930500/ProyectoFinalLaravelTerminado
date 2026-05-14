@@ -41,8 +41,8 @@ const submit = () => {
         <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
             <header class="flex items-center">
                 <Link href="/" class="inline-flex items-center gap-3">
-                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00C853] text-sm font-bold text-black">
-                        RC
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white ring-1 ring-emerald-200">
+                        <img src="/images/ui/soccer-ball-logo.png" alt="ReservaCancha" class="h-8 w-8 object-contain">
                     </span>
                     <span class="flex flex-col leading-tight">
                         <span class="text-sm font-semibold text-white">ReservaCancha</span>
@@ -87,8 +87,8 @@ const submit = () => {
                         <div class="w-full max-w-xl rounded-[2rem] border border-white/15 bg-white/12 p-3 shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl">
                             <div class="rounded-[1.65rem] bg-white p-7 shadow-inner shadow-emerald-100/50 sm:p-8">
                                 <div class="flex items-center gap-3">
-                                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00C853] text-sm font-bold text-black">
-                                        RC
+                                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white ring-1 ring-emerald-200">
+                                        <img src="/images/ui/soccer-ball-logo.png" alt="ReservaCancha" class="h-9 w-9 object-contain">
                                     </span>
                                     <div>
                                         <div class="text-sm font-semibold text-slate-950">Ingresar al panel</div>
