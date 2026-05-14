@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SpaceStatusWidget from '@/Components/SpaceStatusWidget.vue';
 import { Link } from '@inertiajs/vue3';
 import {
     ArcElement,
@@ -39,6 +40,7 @@ const props = defineProps({
     reservationsByStatus: Array,
     spaceOccupancy: Array,
     weeklyIncome: Array,
+    estadoActual: Array,
 });
 
 const statusClasses = {
@@ -61,11 +63,11 @@ const statusChartColors = {
     confirmed: '#10B981',
     rejected: '#EF4444',
     cancelled: '#EF4444',
-    finished: '#9CA3AF',
+    finished: '#94A3B8',
 };
 
-const axisTickColor = '#9CA3AF';
-const gridColor = 'rgba(255,255,255,0.05)';
+const axisTickColor = '#64748B';
+const gridColor = 'rgba(15,23,42,0.08)';
 
 function formatDateTime(value) {
     return new Intl.DateTimeFormat('es-CO', {
@@ -115,11 +117,11 @@ const baseCartesianOptions = {
             },
         },
         tooltip: {
-            backgroundColor: '#0b1510',
-            borderColor: '#1e3a24',
+            backgroundColor: '#ffffff',
+            borderColor: '#d1fae5',
             borderWidth: 1,
-            titleColor: '#ffffff',
-            bodyColor: '#d1d5db',
+            titleColor: '#0f172a',
+            bodyColor: '#334155',
         },
     },
     scales: {
@@ -179,7 +181,7 @@ const statusDonutData = computed(() => ({
     datasets: [
         {
             data: props.reservationsByStatus.map((item) => Number(item.total ?? 0)),
-            backgroundColor: props.reservationsByStatus.map((item) => statusChartColors[item.status] ?? '#9CA3AF'),
+            backgroundColor: props.reservationsByStatus.map((item) => statusChartColors[item.status] ?? '#94A3B8'),
             borderWidth: 0,
         },
     ],
@@ -198,11 +200,11 @@ const statusDonutOptions = computed(() => ({
             },
         },
         tooltip: {
-            backgroundColor: '#0b1510',
-            borderColor: '#1e3a24',
+            backgroundColor: '#ffffff',
+            borderColor: '#d1fae5',
             borderWidth: 1,
-            titleColor: '#ffffff',
-            bodyColor: '#d1d5db',
+            titleColor: '#0f172a',
+            bodyColor: '#334155',
         },
     },
 }));
@@ -280,9 +282,9 @@ const weeklyIncomeOptions = computed(() => ({
         <template #header>
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Panel administrativo</div>
-                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Resumen operativo</h2>
-                    <p class="mt-2 text-sm text-slate-300">Estado actual de reservas, uso de espacios y actividad inmediata.</p>
+                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-600">Panel administrativo</div>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Resumen operativo</h2>
+                    <p class="mt-2 text-sm text-slate-600">Estado actual de reservas, uso de espacios y actividad inmediata.</p>
                 </div>
             </div>
         </template>
@@ -290,17 +292,17 @@ const weeklyIncomeOptions = computed(() => ({
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <section class="grid gap-4 md:grid-cols-3">
-                    <div class="rounded-[1.75rem] bg-slate-950 p-6 text-white shadow-2xl shadow-slate-900/15">
-                        <p class="text-sm font-medium text-slate-300">Pendientes Hoy</p>
-                        <p class="mt-4 text-4xl font-semibold">{{ pendingToday }}</p>
-                        <p class="mt-2 text-sm text-slate-400">Solicitudes esperando decision administrativa.</p>
+                    <div class="rounded-[1.75rem] border border-emerald-100 bg-white p-6 shadow-xl shadow-emerald-100/40">
+                        <p class="text-sm font-medium text-slate-500">Pendientes Hoy</p>
+                        <p class="mt-4 text-4xl font-semibold text-slate-950">{{ pendingToday }}</p>
+                        <p class="mt-2 text-sm text-slate-500">Solicitudes esperando decision administrativa.</p>
                     </div>
-                    <div class="rounded-[1.75rem] bg-emerald-500 p-6 text-slate-950 shadow-2xl shadow-emerald-200">
+                    <div class="rounded-[1.75rem] bg-emerald-500 p-6 text-slate-950 shadow-xl shadow-emerald-200">
                         <p class="text-sm font-medium text-emerald-950/70">Confirmadas Esta Semana</p>
                         <p class="mt-4 text-4xl font-semibold">{{ confirmedThisWeek }}</p>
                         <p class="mt-2 text-sm text-emerald-950/70">Reservas aprobadas y listas para operar.</p>
                     </div>
-                    <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
+                    <div class="rounded-[1.75rem] border border-emerald-100 bg-[#f7fbf8] p-6 shadow-xl shadow-emerald-100/30">
                         <p class="text-sm font-medium text-slate-500">Total Canchas Activas</p>
                         <p class="mt-4 text-4xl font-semibold text-slate-950">{{ spaces.length }}</p>
                         <p class="mt-2 text-sm text-slate-500">Espacios visibles hoy en el modulo publico.</p>
@@ -308,40 +310,40 @@ const weeklyIncomeOptions = computed(() => ({
                 </section>
 
                 <section class="grid gap-6 lg:grid-cols-2">
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-white">Reservas ultimos 7 dias</h3>
-                            <p class="mt-1 text-sm text-slate-400">Actividad reciente de creacion de reservas.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Reservas ultimos 7 dias</h3>
+                            <p class="mt-1 text-sm text-slate-500">Actividad reciente de creacion de reservas.</p>
                         </div>
                         <div class="h-80">
                             <Line :data="reservationsLineData" :options="reservationsLineOptions" />
                         </div>
                     </article>
 
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-white">Reservas por estado</h3>
-                            <p class="mt-1 text-sm text-slate-400">Distribucion actual del flujo de solicitudes.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Reservas por estado</h3>
+                            <p class="mt-1 text-sm text-slate-500">Distribucion actual del flujo de solicitudes.</p>
                         </div>
                         <div class="h-80">
                             <Doughnut :data="statusDonutData" :options="statusDonutOptions" />
                         </div>
                     </article>
 
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-white">Reservas por cancha</h3>
-                            <p class="mt-1 text-sm text-slate-400">Confirmadas este mes por espacio activo.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Reservas por cancha</h3>
+                            <p class="mt-1 text-sm text-slate-500">Confirmadas este mes por espacio activo.</p>
                         </div>
                         <div class="h-80">
                             <Bar :data="occupancyBarData" :options="occupancyBarOptions" />
                         </div>
                     </article>
 
-                    <article class="rounded-2xl border border-[#1e3a24] bg-[#111f16] p-5 shadow-xl shadow-black/10">
+                    <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-white">Ingresos por semana</h3>
-                            <p class="mt-1 text-sm text-slate-400">Valor estimado de reservas confirmadas recientes.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Ingresos por semana</h3>
+                            <p class="mt-1 text-sm text-slate-500">Valor estimado de reservas confirmadas recientes.</p>
                         </div>
                         <div class="h-80">
                             <Bar :data="weeklyIncomeData" :options="weeklyIncomeOptions" />
@@ -349,52 +351,56 @@ const weeklyIncomeOptions = computed(() => ({
                     </article>
                 </section>
 
-                <section class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
-                    <div class="border-b border-slate-200 px-6 py-5">
-                        <h3 class="text-lg font-semibold text-slate-950">Proximas reservas</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Cancha</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Cliente</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Fecha/Hora</th>
-                                    <th class="px-6 py-3 text-left font-semibold text-slate-600">Estado</th>
-                                    <th class="px-6 py-3 text-right font-semibold text-slate-600">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
-                                <tr v-for="reservation in upcomingReservations" :key="reservation.id">
-                                    <td class="px-6 py-4 text-slate-900">{{ reservation.space?.name }}</td>
-                                    <td class="px-6 py-4 text-slate-600">{{ reservation.user_name }}</td>
-                                    <td class="px-6 py-4 text-slate-600">{{ formatDateTime(reservation.start_time) }}</td>
-                                    <td class="px-6 py-4">
-                                        <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="statusClasses[reservation.status]">
-                                            {{ reservation.status }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <Link :href="route('admin.reservations.show', reservation.slug)" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">
-                                            Ver
-                                        </Link>
-                                    </td>
-                                </tr>
-                                <tr v-if="!upcomingReservations.length">
-                                    <td colspan="5" class="px-6 py-10 text-center text-slate-500">No hay reservas confirmadas proximas.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+                    <section class="overflow-hidden rounded-[1.75rem] border border-emerald-100 bg-white shadow-xl shadow-emerald-100/40">
+                        <div class="border-b border-emerald-100 px-6 py-5">
+                            <h3 class="text-lg font-semibold text-slate-950">Proximas reservas</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-emerald-100 text-sm">
+                                <thead class="bg-[#f7fbf8]">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left font-semibold text-slate-600">Cancha</th>
+                                        <th class="px-6 py-3 text-left font-semibold text-slate-600">Cliente</th>
+                                        <th class="px-6 py-3 text-left font-semibold text-slate-600">Fecha/Hora</th>
+                                        <th class="px-6 py-3 text-left font-semibold text-slate-600">Estado</th>
+                                        <th class="px-6 py-3 text-right font-semibold text-slate-600">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-emerald-100 bg-white">
+                                    <tr v-for="reservation in upcomingReservations" :key="reservation.id">
+                                        <td class="px-6 py-4 text-slate-900">{{ reservation.space?.name }}</td>
+                                        <td class="px-6 py-4 text-slate-600">{{ reservation.user_name }}</td>
+                                        <td class="px-6 py-4 text-slate-600">{{ formatDateTime(reservation.start_time) }}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="statusClasses[reservation.status]">
+                                                {{ reservation.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <Link :href="route('admin.reservations.show', reservation.slug)" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">
+                                                Ver
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="!upcomingReservations.length">
+                                        <td colspan="5" class="px-6 py-10 text-center text-slate-500">No hay reservas confirmadas proximas.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <SpaceStatusWidget :spaces="estadoActual" />
                 </section>
 
-                <section class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
-                    <div class="border-b border-slate-200 px-6 py-5">
+                <section class="overflow-hidden rounded-[1.75rem] border border-emerald-100 bg-white shadow-xl shadow-emerald-100/40">
+                    <div class="border-b border-emerald-100 px-6 py-5">
                         <h3 class="text-lg font-semibold text-slate-950">Canchas</h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 text-sm">
-                            <thead class="bg-slate-50">
+                        <table class="min-w-full divide-y divide-emerald-100 text-sm">
+                            <thead class="bg-[#f7fbf8]">
                                 <tr>
                                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Nombre</th>
                                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Tipo</th>
@@ -402,7 +408,7 @@ const weeklyIncomeOptions = computed(() => ({
                                     <th class="px-6 py-3 text-left font-semibold text-slate-600">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
+                            <tbody class="divide-y divide-emerald-100 bg-white">
                                 <tr v-for="space in spaces" :key="space.id">
                                     <td class="px-6 py-4 font-medium text-slate-900">{{ space.name }}</td>
                                     <td class="px-6 py-4 text-slate-600">{{ typeLabels[space.type] ?? space.type }}</td>

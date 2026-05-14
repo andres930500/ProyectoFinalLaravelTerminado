@@ -1,10 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import Banner from '@/Components/Banner.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import { ref } from "vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import Banner from "@/Components/Banner.vue";
+import NotificationBell from "@/Components/NotificationBell.vue";
 
 defineProps({
     title: String,
@@ -12,22 +10,14 @@ defineProps({
 
 const showingNavigationDropdown = ref(false);
 
-const switchToTeam = (team) => {
-    router.put(route('current-team.update'), {
-        team_id: team.id,
-    }, {
-        preserveState: false,
-    });
-};
-
 const logout = () => {
-    router.post(route('logout'));
+    router.post(route("logout"));
 };
 
 function navClasses(active) {
     return active
-        ? '!bg-white/10 !text-white rounded-full px-4 py-2 before:hidden'
-        : '!text-slate-200 rounded-full px-4 py-2 before:hidden hover:!bg-white/10 hover:!text-white';
+        ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
+        : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700";
 }
 </script>
 
@@ -37,281 +27,478 @@ function navClasses(active) {
 
         <Banner />
 
-        <div class="min-h-screen bg-[#f3f5f7]">
-            <div class="absolute inset-x-0 top-0 h-72 bg-[linear-gradient(180deg,#0f172a_0%,#0f172a_30%,#f3f5f7_100%)]"></div>
+        <div class="h-screen overflow-hidden bg-[#eef4ef]">
+            <div
+                class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,#dff7e8_0%,#eef4ef_50%,#eef4ef_100%)]"
+            ></div>
 
-            <nav class="relative border-b border-white/10 bg-slate-950/90 backdrop-blur-xl">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-20 justify-between">
-                        <div class="flex items-center">
-                            <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/30">
-                                            RC
-                                        </div>
-                                        <div class="hidden sm:block">
-                                            <div class="text-sm font-semibold text-white">ReservaCancha Admin</div>
-                                            <div class="text-xs text-slate-400">Control operativo de espacios y reservas</div>
-                                        </div>
-                                    </div>
-                                </Link>
+            <div class="relative flex h-full min-h-0">
+                <aside
+                    class="hidden h-screen w-72 shrink-0 border-r border-emerald-100 bg-[#f7fbf8] xl:sticky xl:top-0 xl:flex xl:flex-col"
+                >
+                    <div class="border-b border-emerald-100 px-6 py-6">
+                        <Link
+                            :href="route('dashboard')"
+                            class="flex items-center gap-3"
+                        >
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/20"
+                            >
+                                RC
                             </div>
+                            <div>
+                                <div
+                                    class="text-sm font-semibold text-slate-900"
+                                >
+                                    ReservaCancha Admin
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    Panel de gestion de reservas
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
 
-                            <div class="hidden sm:ms-10 sm:flex sm:items-center sm:gap-2">
-                                <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')" :class="navClasses(route().current('dashboard'))">
-                                    Dashboard
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('admin.calendar')" :active="route().current('admin.calendar')" :class="navClasses(route().current('admin.calendar'))">
-                                    Calendario
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('admin.spaces.index')" :active="route().current('admin.spaces.*')" :class="navClasses(route().current('admin.spaces.*'))">
-                                    Canchas
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('admin.reservations.index')" :active="route().current('admin.reservations.*')" :class="navClasses(route().current('admin.reservations.*'))">
-                                    Reservas
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('admin.reports')" :active="route().current('admin.reports*')" :class="navClasses(route().current('admin.reports*'))">
-                                    <span class="inline-flex items-center gap-2">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V9" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19V5" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 19v-7" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M22 19V3" />
-                                        </svg>
-                                        Reportes
-                                    </span>
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink :href="route('admin.blocked-slots.index')" :active="route().current('admin.blocked-slots.*')" :class="navClasses(route().current('admin.blocked-slots.*'))">
-                                    Bloqueos
-                                </ResponsiveNavLink>
-                            </div>
+                    <div class="flex-1 px-4 py-6">
+                        <div
+                            class="mb-4 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400"
+                        >
+                            Navegacion
                         </div>
 
-                        <div class="hidden sm:flex sm:items-center sm:ms-6">
-                            <div class="ms-3 relative">
-                                <Dropdown v-if="$page.props.jetstream.hasTeamFeatures" align="right" width="60">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button type="button" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-                                                {{ $page.props.auth.user.current_team.name }}
-
-                                                <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <div class="w-60">
-                                            <div class="block px-4 py-2 text-xs text-gray-400">
-                                                Manage Team
-                                            </div>
-
-                                            <DropdownLink :href="route('teams.show', $page.props.auth.user.current_team)">
-                                                Team Settings
-                                            </DropdownLink>
-
-                                            <DropdownLink v-if="$page.props.jetstream.canCreateTeams" :href="route('teams.create')">
-                                                Create New Team
-                                            </DropdownLink>
-
-                                            <template v-if="$page.props.auth.user.all_teams.length > 1">
-                                                <div class="border-t border-gray-200" />
-
-                                                <div class="block px-4 py-2 text-xs text-gray-400">
-                                                    Switch Teams
-                                                </div>
-
-                                                <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
-                                                    <form @submit.prevent="switchToTeam(team)">
-                                                        <DropdownLink as="button">
-                                                            <div class="flex items-center">
-                                                                <svg v-if="team.id == $page.props.auth.user.current_team_id" class="me-2 size-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-
-                                                                <div>{{ team.name }}</div>
-                                                            </div>
-                                                        </DropdownLink>
-                                                    </form>
-                                                </template>
-                                            </template>
-                                        </div>
-                                    </template>
-                                </Dropdown>
-                            </div>
-
-                            <div class="ms-3 relative">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <button v-if="$page.props.jetstream.managesProfilePhotos" class="flex rounded-full border-2 border-transparent text-sm transition focus:outline-none focus:border-gray-300">
-                                            <img class="size-8 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
-                                        </button>
-
-                                        <span v-else class="inline-flex rounded-md">
-                                            <button type="button" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <div class="block px-4 py-2 text-xs text-gray-400">
-                                            Manage Account
-                                        </div>
-
-                                        <DropdownLink :href="route('profile.show')">
-                                            Profile
-                                        </DropdownLink>
-
-                                        <DropdownLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')">
-                                            API Tokens
-                                        </DropdownLink>
-
-                                        <div class="border-t border-gray-200" />
-
-                                        <form @submit.prevent="logout">
-                                            <DropdownLink as="button">
-                                                Log Out
-                                            </DropdownLink>
-                                        </form>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 p-2 text-slate-200 transition duration-150 ease-in-out hover:bg-white/10 focus:outline-none" @click="showingNavigationDropdown = ! showingNavigationDropdown">
-                                <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <nav class="space-y-2">
+                            <Link
+                                :href="route('dashboard')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(route().current('dashboard'))
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
                                     <path
-                                        :class="{'hidden': showingNavigationDropdown, 'inline-flex': ! showingNavigationDropdown }"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
+                                        d="M3 12l9-9 9 9"
                                     />
                                     <path
-                                        :class="{'hidden': ! showingNavigationDropdown, 'inline-flex': showingNavigationDropdown }"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
+                                        d="M9 21V9h6v12"
                                     />
                                 </svg>
-                            </button>
+                                Dashboard
+                            </Link>
+
+                            <Link
+                                :href="route('admin.calendar')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.calendar'),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="18"
+                                        rx="2"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 2v4M8 2v4M3 10h18"
+                                    />
+                                </svg>
+                                Calendario
+                            </Link>
+
+                            <Link
+                                :href="route('admin.spaces.index')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.spaces.*'),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 19l8-14 8 14"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5.5 16h13"
+                                    />
+                                </svg>
+                                Canchas
+                            </Link>
+
+                            <Link
+                                :href="route('admin.reservations.index')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.reservations.*'),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8 7h8M8 12h8M8 17h5"
+                                    />
+                                    <rect
+                                        x="4"
+                                        y="3"
+                                        width="16"
+                                        height="18"
+                                        rx="2"
+                                    />
+                                </svg>
+                                Reservas
+                            </Link>
+
+                            <Link
+                                :href="route('admin.clients.index')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.clients.*'),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"
+                                    />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M22 21v-2a4 4 0 00-3-3.87"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 3.13a4 4 0 010 7.75"
+                                    />
+                                </svg>
+                                Clientes
+                            </Link>
+
+                            <Link
+                                :href="route('admin.reports')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.reports*'),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 19V9"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M10 19V5"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 19v-7"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M22 19V3"
+                                    />
+                                </svg>
+                                Reportes
+                            </Link>
+
+                            <Link
+                                :href="route('admin.blocked-slots.index')"
+                                class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current(
+                                            'admin.blocked-slots.*',
+                                        ),
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8 8l8 8"
+                                    />
+                                </svg>
+                                Bloqueos
+                            </Link>
+                        </nav>
+                    </div>
+
+                    <div class="border-t border-emerald-100 px-6 py-5">
+                        <div
+                            class="rounded-2xl bg-white p-4 shadow-sm shadow-slate-200/60 ring-1 ring-emerald-100"
+                        >
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ $page.props.auth.user.name }}
+                            </div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                {{ $page.props.auth.user.email }}
+                            </div>
+                            <Link
+                                :href="route('profile.show')"
+                                class="mt-4 inline-flex text-sm font-medium text-emerald-700 transition hover:text-emerald-800"
+                            >
+                                Ver perfil
+                            </Link>
                         </div>
                     </div>
-                </div>
+                </aside>
 
-                <div :class="{'block': showingNavigationDropdown, 'hidden': ! showingNavigationDropdown}" class="border-t border-white/10 bg-slate-950 sm:hidden">
-                    <div class="space-y-1 px-4 pb-3 pt-4">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('admin.calendar')" :active="route().current('admin.calendar')">
-                            Calendario
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('admin.spaces.index')" :active="route().current('admin.spaces.*')">
-                            Canchas
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('admin.reservations.index')" :active="route().current('admin.reservations.*')">
-                            Reservas
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('admin.reports')" :active="route().current('admin.reports*')">
-                            Reportes
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('admin.blocked-slots.index')" :active="route().current('admin.blocked-slots.*')">
-                            Bloqueos
-                        </ResponsiveNavLink>
-                    </div>
+                <div class="flex min-w-0 flex-1 min-h-0 flex-col">
+                    <header
+                        class="sticky top-0 z-30 border-b border-emerald-100 bg-white/85 backdrop-blur-xl"
+                    >
+                        <div
+                            class="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8"
+                        >
+                            <div class="flex items-center gap-3">
+                                <button
+                                    class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-100 bg-white text-slate-600 shadow-sm xl:hidden"
+                                    @click="
+                                        showingNavigationDropdown =
+                                            !showingNavigationDropdown
+                                    "
+                                >
+                                    <svg
+                                        class="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            v-if="!showingNavigationDropdown"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M4 6h16M4 12h16M4 18h16"
+                                        />
+                                        <path
+                                            v-else
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
 
-                    <div class="border-t border-white/10 pb-4 pt-4">
-                        <div class="flex items-center px-4">
-                            <div v-if="$page.props.jetstream.managesProfilePhotos" class="shrink-0 me-3">
-                                <img class="size-10 rounded-full object-cover" :src="$page.props.auth.user.profile_photo_url" :alt="$page.props.auth.user.name">
-                            </div>
-
-                            <div>
-                                <div class="font-medium text-base text-white">
-                                    {{ $page.props.auth.user.name }}
-                                </div>
-                                <div class="font-medium text-sm text-slate-400">
-                                    {{ $page.props.auth.user.email }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                Profile
-                            </ResponsiveNavLink>
-
-                            <ResponsiveNavLink v-if="$page.props.jetstream.hasApiFeatures" :href="route('api-tokens.index')" :active="route().current('api-tokens.index')">
-                                API Tokens
-                            </ResponsiveNavLink>
-
-                            <form method="POST" @submit.prevent="logout">
-                                <ResponsiveNavLink as="button">
-                                    Log Out
-                                </ResponsiveNavLink>
-                            </form>
-
-                            <template v-if="$page.props.jetstream.hasTeamFeatures">
-                                <div class="border-t border-white/10" />
-
-                                <div class="block px-4 py-2 text-xs text-slate-400">
-                                    Manage Team
-                                </div>
-
-                                <ResponsiveNavLink :href="route('teams.show', $page.props.auth.user.current_team)" :active="route().current('teams.show')">
-                                    Team Settings
-                                </ResponsiveNavLink>
-
-                                <ResponsiveNavLink v-if="$page.props.jetstream.canCreateTeams" :href="route('teams.create')" :active="route().current('teams.create')">
-                                    Create New Team
-                                </ResponsiveNavLink>
-
-                                <template v-if="$page.props.auth.user.all_teams.length > 1">
-                                    <div class="border-t border-white/10" />
-
-                                    <div class="block px-4 py-2 text-xs text-slate-400">
-                                        Switch Teams
+                                <div>
+                                    <div
+                                        class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-600"
+                                    >
+                                        Panel administrativo
                                     </div>
+                                    <div
+                                        class="mt-1 text-lg font-semibold text-slate-900"
+                                    >
+                                        {{ title }}
+                                    </div>
+                                </div>
+                            </div>
 
-                                    <template v-for="team in $page.props.auth.user.all_teams" :key="team.id">
-                                        <form @submit.prevent="switchToTeam(team)">
-                                            <ResponsiveNavLink as="button">
-                                                <div class="flex items-center">
-                                                    <svg v-if="team.id == $page.props.auth.user.current_team_id" class="me-2 size-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    <div>{{ team.name }}</div>
-                                                </div>
-                                            </ResponsiveNavLink>
-                                        </form>
-                                    </template>
-                                </template>
-                            </template>
+                            <div class="flex items-center gap-3">
+                                <NotificationBell />
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center gap-2 rounded-2xl border border-emerald-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                                    @click="logout"
+                                >
+                                    <svg
+                                        class="h-4 w-4"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M10 17l5-5-5-5"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15 12H3"
+                                        />
+                                    </svg>
+                                    Cerrar sesion
+                                </button>
+                            </div>
                         </div>
+                    </header>
+
+                    <div
+                        v-if="showingNavigationDropdown"
+                        class="border-b border-emerald-100 bg-white px-4 py-4 shadow-sm xl:hidden"
+                    >
+                        <nav class="grid gap-2">
+                            <Link
+                                :href="route('dashboard')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(route().current('dashboard'))
+                                "
+                                >Dashboard</Link
+                            >
+                            <Link
+                                :href="route('admin.calendar')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.calendar'),
+                                    )
+                                "
+                                >Calendario</Link
+                            >
+                            <Link
+                                :href="route('admin.spaces.index')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.spaces.*'),
+                                    )
+                                "
+                                >Canchas</Link
+                            >
+                            <Link
+                                :href="route('admin.reservations.index')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.reservations.*'),
+                                    )
+                                "
+                                >Reservas</Link
+                            >
+                            <Link
+                                :href="route('admin.clients.index')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.clients.*'),
+                                    )
+                                "
+                                >Clientes</Link
+                            >
+                            <Link
+                                :href="route('admin.reports')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current('admin.reports*'),
+                                    )
+                                "
+                                >Reportes</Link
+                            >
+                            <Link
+                                :href="route('admin.blocked-slots.index')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium transition"
+                                :class="
+                                    navClasses(
+                                        route().current(
+                                            'admin.blocked-slots.*',
+                                        ),
+                                    )
+                                "
+                                >Bloqueos</Link
+                            >
+                            <Link
+                                :href="route('profile.show')"
+                                class="rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+                            >
+                                Perfil
+                            </Link>
+                        </nav>
                     </div>
-                </div>
-            </nav>
 
-            <header v-if="$slots.header" class="relative">
-                <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
-            </header>
+                    <header v-if="$slots.header" class="relative">
+                        <div
+                            class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
+                        >
+                            <slot name="header" />
+                        </div>
+                    </header>
 
-            <main class="relative pb-10">
-                <slot />
-            </main>
+                    <main class="relative min-h-0 flex-1 overflow-y-auto pb-10">
+                        <slot />
+                    </main>
+                </div>
+            </div>
         </div>
     </div>
 </template>

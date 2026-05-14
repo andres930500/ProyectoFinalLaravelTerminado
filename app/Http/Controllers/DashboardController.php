@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\Space;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -90,6 +91,27 @@ class DashboardController extends Controller
             })
             ->values();
 
+        $currentDayOfWeek = $today->dayOfWeek;
+
+        $estadoActual = Space::query()
+            ->active()
+            ->with([
+                'availabilities' => fn ($query) => $query
+                    ->where('day_of_week', $currentDayOfWeek)
+                    ->orderBy('start_time'),
+                'reservations' => fn ($query) => $query
+                    ->whereDate('start_time', $today->toDateString())
+                    ->orderBy('start_time'),
+                'blockedSlots' => fn ($query) => $query
+                    ->whereDate('start_time', '<=', $today->toDateString())
+                    ->whereDate('end_time', '>=', $today->toDateString())
+                    ->orderBy('start_time'),
+            ])
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Space $space) => $this->resolveCurrentSpaceStatus($space, $today))
+            ->values();
+
         return Inertia::render('Dashboard', [
             'pendingToday' => $pendingTodayCount,
             'confirmedThisWeek' => $confirmedWeekCount,
@@ -99,6 +121,72 @@ class DashboardController extends Controller
             'reservationsByStatus' => $reservationsByStatus,
             'spaceOccupancy' => $spaceOccupancy,
             'weeklyIncome' => $weeklyIncome,
+            'estadoActual' => $estadoActual,
         ]);
+    }
+
+    protected function resolveCurrentSpaceStatus(Space $space, Carbon $now): array
+    {
+        $activeReservation = $space->reservations
+            ->first(fn (Reservation $reservation) => in_array($reservation->status, ['pending', 'confirmed'], true)
+                && $reservation->start_time->lessThanOrEqualTo($now)
+                && $reservation->end_time->greaterThan($now));
+
+        $activeBlock = $space->blockedSlots
+            ->first(fn ($blockedSlot) => $blockedSlot->start_time->lessThanOrEqualTo($now)
+                && $blockedSlot->end_time->greaterThan($now));
+
+        $todaySchedule = $this->formatTodaySchedule($space->availabilities);
+        $withinAvailability = $space->availabilities->contains(function ($availability) use ($now) {
+            $time = $now->format('H:i:s');
+
+            return $availability->start_time <= $time && $availability->end_time > $time;
+        });
+
+        $nextReservation = $space->reservations
+            ->first(fn (Reservation $reservation) => $reservation->start_time->greaterThan($now));
+
+        $state = 'available';
+
+        if ($activeBlock) {
+            $state = 'blocked';
+        } elseif ($activeReservation?->status === 'pending') {
+            $state = 'pending';
+        } elseif ($activeReservation?->status === 'confirmed') {
+            $state = 'confirmed';
+        } elseif (! $withinAvailability) {
+            $state = 'closed';
+        }
+
+        return [
+            'id' => $space->id,
+            'name' => $space->name,
+            'type' => $space->type,
+            'estado' => $state,
+            'reserva_actual' => $activeReservation ? [
+                'cliente' => $activeReservation->user_name,
+                'hasta' => $activeReservation->end_time->format('H:i'),
+            ] : null,
+            'bloqueo_actual' => $activeBlock ? [
+                'motivo' => $activeBlock->reason,
+                'hasta' => $activeBlock->end_time->format('H:i'),
+            ] : null,
+            'proxima_reserva' => $nextReservation ? [
+                'cliente' => $nextReservation->user_name,
+                'a_las' => $nextReservation->start_time->format('H:i'),
+            ] : null,
+            'horario_hoy' => $todaySchedule,
+        ];
+    }
+
+    protected function formatTodaySchedule(Collection $availabilities): ?string
+    {
+        if ($availabilities->isEmpty()) {
+            return null;
+        }
+
+        return $availabilities
+            ->map(fn ($availability) => substr($availability->start_time, 0, 5).' - '.substr($availability->end_time, 0, 5))
+            ->implode(' | ');
     }
 }

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AdminAvailabilityController;
 use App\Http\Controllers\AdminBlockedSlotController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\AdminReservationController;
 use App\Http\Controllers\AdminSpaceController;
 use App\Http\Controllers\CalendarController;
@@ -21,6 +23,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('dashboard');
     Route::redirect('/dashboard', '/home')->name('dashboard.redirect');
     Route::get('/calendar', [CalendarController::class, 'index'])->name('admin.calendar');
+    Route::get('/admin/notifications/summary', [NotificationController::class, 'summary'])->name('admin.notifications.summary');
+    Route::get('/admin/clients', [ClientController::class, 'index'])->name('admin.clients.index');
+    Route::get('/admin/clients/{email}', [ClientController::class, 'show'])
+        ->where('email', '.*')
+        ->name('admin.clients.show');
     Route::get('/admin/reports', [ReportController::class, 'index'])->name('admin.reports');
     Route::get('/admin/reports/export', [ReportController::class, 'export'])->name('admin.reports.export');
     Route::resource('admin/spaces', AdminSpaceController::class)->names('admin.spaces');
