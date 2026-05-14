@@ -15,7 +15,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { Bar, Doughnut, Line } from 'vue-chartjs';
 
 ChartJS.register(
@@ -36,7 +36,7 @@ const props = defineProps({
     confirmedThisWeek: Number,
     upcomingReservations: Array,
     spaces: Array,
-    reservationsByDay: Array,
+    dailyReservedHours: Array,
     reservationsByStatus: Array,
     spaceOccupancy: Array,
     weeklyIncome: Array,
@@ -49,6 +49,7 @@ const filters = reactive({
     from: props.selectedFrom,
     to: props.selectedTo,
 });
+const mobileRangeOpen = ref(false);
 
 let filterUpdateTimeout = null;
 
@@ -73,6 +74,14 @@ const statusChartColors = {
     rejected: '#EF4444',
     cancelled: '#EF4444',
     finished: '#94A3B8',
+};
+
+const statusLabels = {
+    pending: 'Pendiente',
+    confirmed: 'Confirmada',
+    rejected: 'Rechazada',
+    cancelled: 'Cancelada',
+    finished: 'Finalizada',
 };
 
 const axisTickColor = '#64748B';
@@ -150,6 +159,8 @@ function isQuickRangeActive(days) {
         && filters.to === end.toISOString().slice(0, 10);
 }
 
+const mobileRangeLabel = computed(() => `${formatShortDate(filters.from)} - ${formatShortDate(filters.to)}`);
+
 watch(() => [filters.from, filters.to], ([nextFrom, nextTo]) => {
     if (!nextFrom || !nextTo) return;
     if (nextFrom === props.selectedFrom && nextTo === props.selectedTo) return;
@@ -201,14 +212,14 @@ const baseCartesianOptions = {
     },
 };
 
-const reservationsLineData = computed(() => {
-    const values = buildRangeValues(props.reservationsByDay, props.selectedFrom, props.selectedTo);
+const reservedHoursLineData = computed(() => {
+    const values = buildRangeValues(props.dailyReservedHours, props.selectedFrom, props.selectedTo);
 
     return {
         labels: values.map((item) => item.label),
         datasets: [
             {
-                label: 'Reservas',
+                label: 'Horas reservadas',
                 data: values.map((item) => item.value),
                 borderColor: '#00C853',
                 backgroundColor: 'rgba(0, 200, 83, 0.18)',
@@ -222,18 +233,34 @@ const reservationsLineData = computed(() => {
     };
 });
 
-const reservationsLineOptions = computed(() => ({
+const reservedHoursLineOptions = computed(() => ({
     ...baseCartesianOptions,
     plugins: {
         ...baseCartesianOptions.plugins,
         legend: {
             display: false,
         },
+        tooltip: {
+            ...baseCartesianOptions.plugins.tooltip,
+            callbacks: {
+                label: (context) => ` ${context.raw} h reservadas`,
+            },
+        },
+    },
+    scales: {
+        ...baseCartesianOptions.scales,
+        y: {
+            ...baseCartesianOptions.scales.y,
+            ticks: {
+                color: axisTickColor,
+                callback: (value) => `${value} h`,
+            },
+        },
     },
 }));
 
 const statusDonutData = computed(() => ({
-    labels: props.reservationsByStatus.map((item) => item.status),
+    labels: props.reservationsByStatus.map((item) => statusLabels[item.status] ?? item.status),
     datasets: [
         {
             data: props.reservationsByStatus.map((item) => Number(item.total ?? 0)),
@@ -342,49 +369,58 @@ const weeklyIncomeOptions = computed(() => ({
                     <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Resumen operativo</h2>
                     <p class="mt-2 text-sm text-slate-600">Estado actual de reservas, uso de espacios y actividad inmediata.</p>
                 </div>
-                <div class="rounded-[1.75rem] border border-emerald-100 bg-white/95 p-4 shadow-lg shadow-emerald-100/40">
-                    <div class="flex flex-col gap-4 xl:min-w-[420px]">
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <div class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Rango analitico</div>
-                                <p class="mt-1 text-sm text-slate-500">Las graficas se actualizan automaticamente al cambiar el rango.</p>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
-                                <button
-                                    type="button"
-                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                                    :class="isQuickRangeActive(7) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
-                                    @click="setQuickRange(7)"
-                                >
-                                    7 dias
-                                </button>
-                                <button
-                                    type="button"
-                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                                    :class="isQuickRangeActive(15) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
-                                    @click="setQuickRange(15)"
-                                >
-                                    15 dias
-                                </button>
-                                <button
-                                    type="button"
-                                    class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-                                    :class="isQuickRangeActive(30) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
-                                    @click="setQuickRange(30)"
-                                >
-                                    30 dias
-                                </button>
-                            </div>
+                <div class="w-full rounded-[1.2rem] border border-emerald-100 bg-white/95 p-3 shadow-lg shadow-emerald-100/30 lg:max-w-[660px]">
+                    <button
+                        type="button"
+                        class="flex w-full items-center justify-between rounded-[0.95rem] border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-left lg:hidden"
+                        @click="mobileRangeOpen = !mobileRangeOpen"
+                    >
+                        <div>
+                            <div class="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Rango</div>
+                            <div class="mt-1 text-sm font-semibold text-slate-900">{{ mobileRangeLabel }}</div>
+                        </div>
+                        <svg class="h-4 w-4 text-slate-500 transition-transform" :class="mobileRangeOpen ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+
+                    <div class="mt-3 flex flex-col gap-3 lg:mt-0 lg:flex lg:flex-row lg:items-center lg:justify-end" :class="mobileRangeOpen ? 'flex' : 'hidden lg:flex'">
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:justify-end">
+                            <span class="shrink-0 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">Rango</span>
+                            <button
+                                type="button"
+                                class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                :class="isQuickRangeActive(7) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                @click="setQuickRange(7)"
+                            >
+                                7 dias
+                            </button>
+                            <button
+                                type="button"
+                                class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                :class="isQuickRangeActive(15) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                @click="setQuickRange(15)"
+                            >
+                                15 dias
+                            </button>
+                            <button
+                                type="button"
+                                class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                                :class="isQuickRangeActive(30) ? 'bg-emerald-500 text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                                @click="setQuickRange(30)"
+                            >
+                                30 dias
+                            </button>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <label class="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
-                                <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Desde</span>
-                                <input v-model="filters.from" type="date" class="mt-2 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
+                        <div class="grid grid-cols-2 gap-2 lg:min-w-[320px]">
+                            <label class="rounded-[0.95rem] border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
+                                <span class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Desde</span>
+                                <input v-model="filters.from" type="date" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
                             </label>
-                            <label class="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
-                                <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Hasta</span>
-                                <input v-model="filters.to" type="date" class="mt-2 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
+                            <label class="rounded-[0.95rem] border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-600 transition focus-within:border-emerald-300 focus-within:bg-white">
+                                <span class="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Hasta</span>
+                                <input v-model="filters.to" type="date" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 shadow-none focus:ring-0">
                             </label>
                         </div>
                     </div>
@@ -415,11 +451,11 @@ const weeklyIncomeOptions = computed(() => ({
                 <section class="grid gap-6 lg:grid-cols-2">
                     <article class="rounded-[1.75rem] border border-emerald-100 bg-white p-5 shadow-xl shadow-emerald-100/40">
                         <div class="mb-4">
-                            <h3 class="text-lg font-semibold text-slate-900">Reservas por rango</h3>
-                            <p class="mt-1 text-sm text-slate-500">Actividad reciente de creacion de reservas en el rango elegido.</p>
+                            <h3 class="text-lg font-semibold text-slate-900">Horas reservadas por dia</h3>
+                            <p class="mt-1 text-sm text-slate-500">Carga operativa real del sistema segun reservas confirmadas en el rango elegido.</p>
                         </div>
                         <div class="h-80">
-                            <Line :data="reservationsLineData" :options="reservationsLineOptions" />
+                            <Line :data="reservedHoursLineData" :options="reservedHoursLineOptions" />
                         </div>
                     </article>
 

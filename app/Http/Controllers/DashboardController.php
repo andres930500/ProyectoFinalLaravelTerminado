@@ -49,12 +49,21 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get();
 
-        $reservationsByDay = Reservation::query()
-            ->selectRaw('DATE(created_at) as fecha, COUNT(*) as total')
-            ->whereBetween('created_at', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive])
-            ->groupBy('fecha')
-            ->orderBy('fecha')
-            ->get();
+        $dailyReservedHours = Reservation::query()
+            ->where('status', 'confirmed')
+            ->whereBetween('start_time', [$rangeStart->copy()->startOfDay(), $rangeEndInclusive])
+            ->orderBy('start_time')
+            ->get()
+            ->groupBy(fn (Reservation $reservation) => $reservation->start_time->toDateString())
+            ->map(function ($items, $date) {
+                $hours = $items->sum(fn (Reservation $reservation) => $reservation->getDurationInMinutes() / 60);
+
+                return [
+                    'fecha' => $date,
+                    'total' => round($hours, 1),
+                ];
+            })
+            ->values();
 
         $reservationsByStatus = Reservation::query()
             ->selectRaw('status, COUNT(*) as total')
@@ -120,7 +129,7 @@ class DashboardController extends Controller
             'confirmedThisWeek' => $confirmedWeekCount,
             'upcomingReservations' => $upcomingReservations,
             'spaces' => $spaces,
-            'reservationsByDay' => $reservationsByDay,
+            'dailyReservedHours' => $dailyReservedHours,
             'reservationsByStatus' => $reservationsByStatus,
             'spaceOccupancy' => $spaceOccupancy,
             'weeklyIncome' => $weeklyIncome,
