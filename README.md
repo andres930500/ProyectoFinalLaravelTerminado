@@ -11,6 +11,7 @@ Permite:
 - reservar sin necesidad de crear cuenta
 - administrar espacios, bloqueos y solicitudes desde un panel privado
 - visualizar reportes operativos y metricas de negocio
+- mostrar ubicacion de cada cancha con direccion y mapa embebido
 
 ## Tecnologias
 
@@ -143,27 +144,35 @@ Usuario admin por defecto:
 ### Modulo publico
 
 - listado de canchas activas con filtros por tipo
+- carrusel horizontal de tarjetas en home con maximo 3 canchas visibles en desktop
+- carrusel automatico de imagenes dentro de cada card cuando la cancha tiene varias fotos
 - detalle completo de cada cancha
-- consulta de disponibilidad por fecha y hora
+- agenda diaria por bloques de 1 hora
+- bloques disponibles en verde y no disponibles en rojo
 - proximos horarios disponibles
 - reserva publica sin autenticacion
 - confirmacion visual al crear reserva
+- ubicacion de la cancha con direccion y mapa de Google embebido
 - boton flotante de WhatsApp para dudas
 - diseno responsive y estilizado
 
 ### Panel administrativo
 
 - dashboard con metricas clave
+- sidebar colapsable con modo compacto por iconos
 - graficas reales con Chart.js:
   - reservas ultimos 7 dias
   - reservas por estado
   - reservas por cancha
   - ingresos por semana
 - CRUD completo de canchas
+- creacion y edicion de direccion de cancha para mapa publico
 - gestion de disponibilidad semanal
 - gestion de bloqueos manuales
 - listado, detalle y cambio de estado de reservas
+- reservas nuevas priorizadas para aprobacion o rechazo
 - calendario semanal por cancha
+- gestion visual de clientes a partir del historial de reservas
 - pagina de reportes con filtros por rango
 - exportacion CSV de reservas
 
@@ -190,7 +199,34 @@ Caracteristicas:
 - carga multiple desde crear o editar cancha
 - almacenamiento en disco `public`
 - la primera imagen se usa como principal
-- en la vista publica del detalle se muestran la principal y miniaturas
+- en home publico se rotan automaticamente si la cancha tiene mas de una
+- las rutas se normalizan para evitar imagenes rotas entre `localhost` y `127.0.0.1`
+
+## Ubicacion y mapas
+
+Cada cancha puede guardar una direccion desde el panel admin.
+
+Caracteristicas:
+
+- campo `Direccion de la cancha` en crear y editar
+- visualizacion publica de la direccion exacta
+- mapa embebido de Google Maps en la vista de detalle
+- boton para abrir la ubicacion directamente en Google Maps
+
+## Seeders demo
+
+Ademas de los seeders base, el proyecto incluye un seeder opcional para poblar clientes y reservas demo de los proximos 8 dias:
+
+```bash
+php artisan db:seed --class=DemoClientsAndReservationsSeeder
+```
+
+Ese seeder:
+
+- crea clientes demo a partir de reservas
+- genera reservas para los proximos 8 dias
+- distribuye estados como `confirmed`, `pending`, `cancelled` y `rejected`
+- evita duplicar historicos demo anteriores porque primero limpia los correos `@demo.reservacancha.test`
 
 ## Correos y notificaciones
 
@@ -211,6 +247,8 @@ php artisan vendor:publish --tag=laravel-mail
 
 ```bash
 php artisan migrate:fresh --seed
+php artisan db:seed --class=DemoClientsAndReservationsSeeder
+php artisan storage:link
 php artisan route:list
 php artisan config:clear
 php artisan about
