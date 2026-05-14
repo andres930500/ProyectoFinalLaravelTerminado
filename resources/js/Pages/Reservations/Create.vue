@@ -73,19 +73,19 @@ function submit() {
 
                     <div>
                         <InputLabel for="user_name" value="Nombre completo" />
-                        <TextInput id="user_name" v-model="form.user_name" type="text" class="mt-1 block w-full" autocomplete="name" />
+                        <TextInput id="user_name" v-model="form.user_name" type="text" class="mt-1 block w-full" autocomplete="name" placeholder="Ej: Juan David Perez" />
                         <InputError class="mt-2" :message="form.errors.user_name" />
                     </div>
 
                     <div>
                         <InputLabel for="user_email" value="Email" />
-                        <TextInput id="user_email" v-model="form.user_email" type="email" class="mt-1 block w-full" autocomplete="email" />
+                        <TextInput id="user_email" v-model="form.user_email" type="email" class="mt-1 block w-full" autocomplete="email" placeholder="Ej: juan@example.com" />
                         <InputError class="mt-2" :message="form.errors.user_email" />
                     </div>
 
                     <div>
                         <InputLabel for="user_phone" value="Telefono" />
-                        <TextInput id="user_phone" v-model="form.user_phone" type="text" class="mt-1 block w-full" autocomplete="tel" />
+                        <TextInput id="user_phone" v-model="form.user_phone" type="text" class="mt-1 block w-full" autocomplete="tel" placeholder="Ej: 3001234567" />
                         <InputError class="mt-2" :message="form.errors.user_phone" />
                     </div>
 
@@ -95,7 +95,8 @@ function submit() {
                             id="notes"
                             v-model="form.notes"
                             rows="4"
-                            class="mt-1 block w-full rounded-2xl border-slate-300 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            class="mt-1 block w-full rounded-2xl border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                            placeholder="Ej: Necesitamos dos balones y preferimos iluminación completa"
                         ></textarea>
                         <InputError class="mt-2" :message="form.errors.notes" />
                     </div>

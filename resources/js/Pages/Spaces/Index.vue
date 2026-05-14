@@ -28,6 +28,8 @@ const filters = computed(() => [
     })),
 ]);
 
+const availableSpacesToday = computed(() => props.spaces.length);
+
 const features = [
     {
         title: 'Confirmacion inmediata',
@@ -239,9 +241,9 @@ watch(visibleCards, () => {
                                 <div class="mt-1 text-xs text-emerald-100/80">Disponibles para reservar</div>
                             </div>
                             <div class="rounded-xl border border-emerald-200/30 bg-[#00C853]/85 p-4">
-                                <div class="text-xs text-emerald-950/80">Tipos en el sistema</div>
-                                <div class="mt-2 text-3xl font-bold text-slate-950">{{ types.length }}</div>
-                                <div class="mt-1 text-xs text-emerald-950/80">Configurados en el sistema</div>
+                                <div class="text-xs text-emerald-950/80">Espacios listos</div>
+                                <div class="mt-2 text-3xl font-bold text-slate-950">{{ availableSpacesToday }}</div>
+                                <div class="mt-1 text-xs text-emerald-950/80">Para reservar hoy o filtrar por tipo</div>
                             </div>
                         </div>
                         <div class="mt-3 rounded-xl border border-white/15 bg-white/12 px-4 py-4 text-xs text-emerald-50">
