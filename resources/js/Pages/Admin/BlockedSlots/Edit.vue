@@ -12,8 +12,8 @@ defineProps({
     <AppLayout title="Editar Bloqueo">
         <template #header>
             <div>
-                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Bloqueos</div>
-                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Editar bloqueo</h2>
+                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Bloqueos</div>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Editar bloqueo</h2>
             </div>
         </template>
 

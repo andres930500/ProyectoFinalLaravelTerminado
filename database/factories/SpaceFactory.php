@@ -47,6 +47,11 @@ class SpaceFactory extends Factory
                 'Uso obligatorio de calzado adecuado. No se permite el ingreso con bebidas alcoholicas.',
                 'Cada equipo debe presentarse 10 minutos antes. El dano a las instalaciones sera cobrado.',
             ]),
+            'address' => fake()->randomElement([
+                'Avenida Kevin Angel # 58-120, Manizales',
+                'Carrera 23 # 64-35, Manizales',
+                'Via Panamericana Km 4, Manizales',
+            ]),
             'price_per_hour' => fake()->randomElement([60000, 70000, 80000, 90000, 120000, 150000]),
             'image' => null,
             'is_active' => true,

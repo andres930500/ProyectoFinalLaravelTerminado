@@ -34,6 +34,7 @@ const form = useForm({
     price_per_hour: props.space?.price_per_hour ?? '',
     description: props.space?.description ?? '',
     rules: props.space?.rules ?? '',
+    address: props.space?.address ?? '',
     images: [],
     is_active: props.space?.is_active ?? true,
     availabilities: buildAvailabilities(),
@@ -123,6 +124,19 @@ function submit() {
                     <InputLabel for="description" value="Descripcion" />
                     <textarea id="description" v-model="form.description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"></textarea>
                     <InputError class="mt-2" :message="form.errors.description" />
+                </div>
+
+                <div class="md:col-span-2">
+                    <InputLabel for="address" value="Direccion de la cancha" />
+                    <TextInput
+                        id="address"
+                        v-model="form.address"
+                        type="text"
+                        class="mt-1 block w-full"
+                        placeholder="Ej: Avenida Kevin Angel # 58-120, Manizales"
+                    />
+                    <p class="mt-2 text-xs text-slate-500">Esta direccion se usara para mostrar el mapa de Google en la vista publica.</p>
+                    <InputError class="mt-2" :message="form.errors.address" />
                 </div>
 
                 <div class="md:col-span-2">

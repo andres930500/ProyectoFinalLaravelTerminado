@@ -82,6 +82,11 @@ class SpaceController extends Controller
             'nextSlots' => $nextSlots,
             'dailySlots' => $dailySlots,
             'availabilities' => $availabilities,
+            'location' => [
+                'address' => $space->formattedAddress(),
+                'embedUrl' => $space->googleMapsEmbedUrl(),
+                'mapsUrl' => $space->googleMapsUrl(),
+            ],
             'selectedDate' => $selectedDate,
             'selectedTime' => $selectedTime,
         ]);

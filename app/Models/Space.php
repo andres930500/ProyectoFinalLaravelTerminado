@@ -27,6 +27,7 @@ class Space extends Model
         'capacity',
         'description',
         'rules',
+        'address',
         'price_per_hour',
         'image',
         'images',
@@ -92,6 +93,37 @@ class Space extends Model
         }
 
         return Number::currency($price, 'COP', locale: 'es_CO');
+    }
+
+    public function formattedAddress(): ?string
+    {
+        if (blank($this->address)) {
+            return null;
+        }
+
+        return trim($this->address);
+    }
+
+    public function googleMapsEmbedUrl(): ?string
+    {
+        $query = $this->mapQuery();
+
+        if ($query === null) {
+            return null;
+        }
+
+        return 'https://www.google.com/maps?q='.urlencode($query).'&output=embed';
+    }
+
+    public function googleMapsUrl(): ?string
+    {
+        $query = $this->mapQuery();
+
+        if ($query === null) {
+            return null;
+        }
+
+        return 'https://www.google.com/maps/search/?api=1&query='.urlencode($query);
     }
 
     public function getImageAttribute(?string $value): ?string
@@ -357,6 +389,23 @@ class Space extends Model
     protected function slotMinutes(): int
     {
         return max(1, (int) env('RESERVATION_SLOT_MINUTES', 60));
+    }
+
+    protected function mapQuery(): ?string
+    {
+        $address = $this->formattedAddress();
+
+        if ($address === null) {
+            return null;
+        }
+
+        $query = $address;
+
+        if (! Str::contains(Str::lower($query), 'manizales')) {
+            $query .= ', Manizales, Caldas, Colombia';
+        }
+
+        return $query;
     }
 
     protected function decodeStoredImages(mixed $value): array

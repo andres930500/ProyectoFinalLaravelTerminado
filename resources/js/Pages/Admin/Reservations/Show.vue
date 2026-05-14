@@ -56,8 +56,8 @@ function submitReject() {
         <template #header>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Detalle</div>
-                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Reserva {{ reservation.slug }}</h2>
+                    <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Detalle</div>
+                    <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Reserva {{ reservation.slug }}</h2>
                 </div>
                 <Link :href="route('admin.reservations.index')" class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10">
                     Volver

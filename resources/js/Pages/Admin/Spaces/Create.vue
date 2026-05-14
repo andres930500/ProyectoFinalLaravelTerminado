@@ -11,8 +11,8 @@ defineProps({
     <AppLayout title="Nueva Cancha">
         <template #header>
             <div>
-                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">Espacios</div>
-                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-white">Nueva cancha</h2>
+                <div class="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700">Espacios</div>
+                <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Nueva cancha</h2>
             </div>
         </template>
 

@@ -12,6 +12,7 @@ const props = defineProps({
     nextSlots: { type: Array, default: () => [] },
     dailySlots: { type: Array, default: () => [] },
     availabilities: { type: Array, default: () => [] },
+    location: { type: Object, default: () => ({}) },
     selectedDate: { type: String, default: '' },
     selectedTime: { type: String, default: '' },
 });
@@ -287,6 +288,47 @@ function slotCardClasses(slot) {
                 </div>
             </div>
         </div>
+
+        <section
+            v-if="location?.address && location?.embedUrl"
+            class="mt-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/40"
+        >
+            <div class="grid lg:grid-cols-[360px_minmax(0,1fr)]">
+                <div class="flex flex-col justify-between gap-5 bg-slate-950 p-6 text-white">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">Ubicacion</div>
+                        <h2 class="mt-3 text-2xl font-semibold text-white">Encuentra la cancha sin perderte</h2>
+                        <p class="mt-3 text-sm leading-6 text-slate-300">
+                            Revisa la direccion exacta antes de reservar y abre el mapa si necesitas la ruta.
+                        </p>
+                    </div>
+
+                    <div class="rounded-[1.5rem] bg-white/10 p-5">
+                        <div class="text-[11px] uppercase tracking-[0.18em] text-slate-300">Direccion registrada</div>
+                        <p class="mt-3 text-sm leading-6 text-white">{{ location.address }}</p>
+                        <a
+                            v-if="location.mapsUrl"
+                            :href="location.mapsUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-5 inline-flex items-center justify-center rounded-2xl bg-[#00C853] px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-[#00b84c]"
+                        >
+                            Abrir en Google Maps
+                        </a>
+                    </div>
+                </div>
+
+                <div class="min-h-[360px] bg-slate-100">
+                    <iframe
+                        :src="location.embedUrl"
+                        class="h-full min-h-[360px] w-full border-0"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen
+                    ></iframe>
+                </div>
+            </div>
+        </section>
 
         <div class="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
